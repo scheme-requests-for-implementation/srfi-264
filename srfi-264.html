@@ -131,7 +131,7 @@ SRE-specific named boundaries can be written via shortcut names (<code>&lt;</cod
 characters can start and end names respectively), and via their normal SRE names:
 </p>
 
-<pre><code>  "{&lt;s|&ltw}." &xrArr; (: (or bos bow) nonl)
+<pre><code>  "{&lt;s|&lt;w}." &xrArr; (: (or bos bow) nonl)
 
   "{bos|bow}." &xrArr; (: (or bos bow) nonl)
 </code></pre>
@@ -140,7 +140,7 @@ characters can start and end names respectively), and via their normal SRE names
 Also, the same notation can represent special named expressions:
 </p>
 
-<pre><code>  "{&lt;w&gt}?" &xrArr; (? word)
+<pre><code>  "{&lt;w&gt;}?" &xrArr; (? word)
 
   "{&lt;g&gt;}{2,}" &xrArr; (>= 2 grapheme)
 </code></pre>
@@ -406,64 +406,64 @@ single-letter variants.
     <th align="left">Name&nbsp;&nbsp;&nbsp;</th><th align="left">Type&nbsp;&nbsp;&nbsp;</th><th align="left">SRE</th></tr>
   <tr><td><code>any</code></td><td>cset</td><td><code>any</code></td>
       <td><code>_</code></td><td>cset</td><td><code>any</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>digit</code></td><td>cset</td><td><code>numeric</code></td>
       <td><code>d</code></td><td>cset</td><td><code>numeric</code></td>
       <td><code>n</code></td><td>cset</td><td><code>numeric</code></td></tr>
   <tr><td><code>lower</code></td><td>cset</td><td><code>lower</code></td>
       <td><code>l</code></td><td>cset</td><td><code>lower</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>upper</code></td><td>cset</td><td><code>upper</code></td>
       <td><code>u</code></td><td>cset</td><td><code>upper</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>alpha</code></td><td>cset</td><td><code>alpha</code></td>
       <td><code>a</code></td><td>cset</td><td><code>alpha</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>alnum</code></td><td>cset</td><td><code>alnum</code></td>
       <td><code>an</code></td><td>cset</td><td><code>alnum</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>xdigit</code></td><td>cset</td><td><code>xdigit</code></td>
       <td><code>x</code></td><td>cset</td><td><code>xdigit</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>cntrl</code></td><td>cset</td><td><code>cntrl</code></td>
       <td><code>c</code></td><td>cset</td><td><code>cntrl</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>punct</code></td><td>cset</td><td><code>punct</code></td>
       <td><code>p</code></td><td>cset</td><td><code>punct</code></td>
-      <td><code></code></td><td></td><td><code></code></td></tr>
+      <td></td><td></td><td></td></tr>
   <tr><td><code>graph</code></td><td>cset</td><td><code>graph</code></td>
     <td><code>g</code></td><td>cset</td><td><code>graph</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>symbol</code></td><td>cset</td><td><code>symbol</code></td>
     <td><code>y</code></td><td>cset</td><td><code>symbol</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>space</code></td><td>cset</td><td><code>space</code></td>
     <td><code>s</code></td><td>cset</td><td><code>space</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>print</code></td><td>cset</td><td><code>print</code></td>
     <td><code>gs</code></td><td>cset</td><td><code>print</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>blank</code></td><td>cset</td><td>see note 1</td>
     <td><code>h</code></td><td>cset</td><td>see note 1</td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
-  <tr><td><code></code></td><td></td><td><code></code></td>
+    <td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td>
     <td><code>v</code></td><td>cset</td><td>see note 2</td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
-  <tr><td><code></code></td><td></td><td><code></code></td>
+    <td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td>
     <td><code>w</code></td><td>cset</td><td>see note 3</td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>bos</code></td><td>bcnd</td><td><code>bos</code></td>
     <td><code>&lt;s</code></td><td>bcnd</td><td><code>bos</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>eos</code></td><td>bcnd</td><td><code>eos</code></td>
     <td><code>s&gt;</code></td><td>bcnd</td><td><code>eos</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>bol</code></td><td>bcnd</td><td><code>bol</code></td>
     <td><code>&lt;l</code></td><td>bcnd</td><td><code>bol</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>eol</code></td><td>bcnd</td><td><code>eol</code></td>
     <td><code>l&gt;</code></td><td>bcnd</td><td><code>eol</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>bow</code></td><td>bcnd</td><td><code>bow</code></td>
     <td><code>&lt;w</code></td><td>bcnd</td><td><code>bow</code></td>
     <td><code>&lt;</code></td><td>bcnd</td><td><code>bow</code></td></tr>
@@ -472,22 +472,22 @@ single-letter variants.
     <td><code>&gt;</code></td><td>bcnd</td><td><code>eow</code></td></tr>
   <tr><td><code>bog</code></td><td>bcnd</td><td><code>bog</code></td>
     <td><code>&lt;g</code></td><td>bcnd</td><td><code>bog</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>eog</code></td><td>bcnd</td><td><code>eog</code></td>
     <td><code>g&gt;</code></td><td>bcnd</td><td><code>eog</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>wb</code></td><td>bcnd</td><td>see note 4</td>
     <td><code>b</code></td><td>bcnd</td><td>see note 4</td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>nwb</code></td><td>bcnd</td><td><code>nwb</code></td>
-    <td><code></code></td><td></td><td><code></code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>&lt;w&gt;</code></td><td>expr</td><td><code>word</code></td>
-    <td><code></code></td><td></td><td><code></code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td>
+    <td></td><td></td><td></td></tr>
   <tr><td><code>&lt;g&gt;</code></td><td>expr</td><td><code>grapheme</code></td>
     <td><code>X</code></td><td>expr</td><td><code>grapheme</code></td>
-    <td><code></code></td><td></td><td><code></code></td></tr>
+    <td></td><td></td><td></td></tr>
   </table>
 
 <p>Note 1: any horizontal space character. In a Unicode context this corresponds to space, tab, and any other character in
@@ -530,7 +530,7 @@ Initially all options are off except for <code>u</code>.
   <tr><td><code>i</code></td><td><code>(w/nocase &hellip;)</code>, <code>(w/case &hellip;)</code></td><td>case-insensitive matching</td></tr>
   <tr><td><code>m</code></td><td><code>^</code> <code>$</code> are <code>bol</code> <code>eol</code>, <code>bos</code> <code>eos</code></td><td>multiline mode</td></tr>
   <tr><td><code>s</code></td><td><code>.</code> is <code>any</code>, <code>nonl</code></td><td>single-line mode</td></tr>
-  <tr><td><code>x</code></td></td><td>relaxed syntax, regular syntax</td><td>free-spacing and comments</td></tr>
+  <tr><td><code>x</code></td><td>relaxed syntax, regular syntax</td><td>free-spacing and comments</td></tr>
   <tr><td><code>n</code></td><td>nothing, <code>($ &hellip;)</code></td><td>do not capture unnamed groups</td></tr>
   <tr><td><code>u</code></td><td><code>(w/unicode &hellip;)</code>, <code>(w/ascii &hellip;)</code></td><td>use Unicode matching</td></tr>
 </table>
