@@ -3,7 +3,7 @@
 
 (define (ssre->sre/opts s . o*)
   (if (pair? o*)
-      (let* ((os (apply string-append (map symbol->string o*))) 
+      (let* ((os (apply string-append (map symbol->string o*)))
              (s (string-append "(?" os ")" s)))
         (string-sre->sre s))
       (string-sre->sre s)))
@@ -48,9 +48,9 @@
 
 (define-syntax test-error
   (syntax-rules ()
-    ((test-error name expr) 
+    ((test-error name expr)
      (test-error expr))
-    ((test-error expr) 
+    ((test-error expr)
      (guard (condition (else (set! *tests-run* (- *tests-run* 1)) (test 'expr 'expr)))
        (test '<fail> expr)))))
 
@@ -69,7 +69,7 @@
      (test-equal 'res (apply ssre->sre/opts 'pat 'o*)))))
 
 ; add some random definitions to pass the tests
-(string-sre-definitions 
+(string-sre-definitions
   (string-sre-bind 'Any 'cset 'any
   (string-sre-bind 'Nd 'cset 'numeric
   (string-sre-bind 'vowel 'cset '(or #\a #\e #\i #\o #\u #\y #\w)
@@ -77,7 +77,7 @@
   (string-sre-bind 'L 'cset 'alpha
   (string-sre-bind 'Ll 'cset 'lower
   (string-sre-bind 'Lu 'cset 'upper
-  (string-sre-definitions)))))))))     
+  (string-sre-definitions)))))))))
 
 (test-ssre "the quick brown fox" () (: #\t #\h #\e #\space #\q #\u #\i #\c #\k #\space #\b #\r #\o #\w #\n #\space #\f #\o #\x))
 (test-ssre "a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz" () (: (* #\a) #\a #\b (? #\c) #\x #\y (+ #\z) #\p #\q (= 3 #\r) #\a (>= 2 #\b) #\x (** 4 5 #\y) #\p (** 0 6 #\q) #\A (>= 0 #\B) #\z #\z))
@@ -1419,7 +1419,7 @@
 (test-ssre "[a]" () #\a)
 (test-ssre "[^a]" () (~ #\a))
 (test-ssre "(?<=C\n)^" () (: (look-behind (: #\C #\newline)) bos))
-(test-ssre "\\w+(?=\t)" () (: (+ (or alnum #\_)) (look-ahead #\tab))) 
+(test-ssre "\\w+(?=\t)" () (: (+ (or alnum #\_)) (look-ahead #\tab)))
 
 ;; new set notation tests
 
