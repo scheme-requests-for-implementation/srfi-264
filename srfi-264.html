@@ -49,14 +49,14 @@ Extensions to PCRE syntax allow concise expression of operations on named charac
 <h2 id="issues">Issues</h2>
 
 <p>The design of the <code>string-sre-definitions</code> procedure assumes that parameters follow the protocol
-described in <a href="https://srfi.schemers.org/srfi-115/">SRFI-39</a>, namely that a parameter procedure
+described in <a href="https://srfi.schemers.org/srfi-115/">SRFI 39</a>, namely that a parameter procedure
 can be called with a value argument to set the parameter globally. This behavior is not required by R7RS.</p>
 
 <h2 id="rationale">Rationale</h2>
 
 <p>
 This SRFI proposes a “PCRE-style” string syntax for Scheme Regular Expressions
-(see <a href="https://srfi.schemers.org/srfi-204/">SRFI-204</a>). Unlike existing
+(see <a href="https://srfi.schemers.org/srfi-204/">SRFI 204</a>). Unlike existing
 parsers with similar goals, the proposed solution features both formal syntax (described
 via RNRS-like extended BNF notation), and well-defined semantics (providing only constructs
 with direct SRE equivalents).
@@ -177,7 +177,7 @@ parameter, e.g.:
 <h2 id="specification">Specification</h2>
 
 <p>
-The specification below assumes the reader's familiarity with both Scheme Regular Expressions (<a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a>)
+The specification below assumes the reader's familiarity with both Scheme Regular Expressions (<a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a>)
 and <a href="https://www.pcre.org/original/doc/html/pcresyntax.html">PCRE Syntax</a>. Only topics requiring special attention are discussed;
 all PCRE constructs supported by SSRE, as defined by the formal syntax below, have their obvious SRE equivalents.
 </p>
@@ -193,7 +193,7 @@ If the string is not a valid SSRE, an error that satisfies <code>string-sre-synt
 <code>(<b>string-sre->regexp</b></code> &langle;<i>string</i>&thinsp;&rangle;<code>)</code>
     &nbsp;&nbsp;<i>procedure</i><br/>
 This procedure converts &langle;<i>string</i>&thinsp;&rangle; in SSRE syntax to the corresponding regexp by
-applying the <code>regexp</code> procedure from <a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a> to the
+applying the <code>regexp</code> procedure from <a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a> to the
 conversion result. If the string is not a valid SSRE, an error that satisfies <code>string-sre-syntax-error?</code>
 is signaled.
 </p>
