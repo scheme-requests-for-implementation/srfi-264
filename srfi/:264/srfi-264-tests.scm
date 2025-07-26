@@ -1,3 +1,5 @@
+;;; SPDX-FileCopyrightText: 2025 Sergei Egorov
+;;; SPDX-License-Identifier: MIT
 
 (define (ssre->sre/opts s . o*)
   (if (pair? o*)
