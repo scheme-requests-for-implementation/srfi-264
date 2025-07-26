@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
     </style>
   </head>
   <body>
-    <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg" 
+    <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg"
     alt="SRFI surfboard logo" /></a>264: String syntax for Scheme Regular Expressions</h1>
 
 <p>by Sergei Egorov</p>
@@ -34,51 +34,51 @@ The editor will add this section.</p>
 <h2 id="abstract">Abstract</h2>
 
 <p>
-This SRFI proposes SSRE, an alternative string-based syntax 
-for Scheme Regular Expressions as defined by <a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a>. 
+This SRFI proposes SSRE, an alternative string-based syntax
+for Scheme Regular Expressions as defined by <a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a>.
 String syntax is both compact and familiar to many regexp users; it is translated directly into SRE S-expressions,
-providing equivalent constructs. While the proposed syntax mostly follows PCRE, it takes into 
-account specifics of Scheme string syntax and limitations of SRE, leaving out constructs 
+providing equivalent constructs. While the proposed syntax mostly follows PCRE, it takes into
+account specifics of Scheme string syntax and limitations of SRE, leaving out constructs
 that either duplicate functionality provided by Scheme strings or have no SRE equivalents.
-The repertoire of named sets and boundary conditions can be extended via a parameter mechanism. 
+The repertoire of named sets and boundary conditions can be extended via a parameter mechanism.
 Extensions to PCRE syntax allow concise expression of operations on named character sets.
 </p>
 
 <h2 id="issues">Issues</h2>
 
 <p>The design of the <code>string-sre-definitions</code> procedure assumes that parameters follow the protocol
-described in <a href="https://srfi.schemers.org/srfi-115/">SRFI-39</a>, namely that a parameter procedure 
+described in <a href="https://srfi.schemers.org/srfi-115/">SRFI-39</a>, namely that a parameter procedure
 can be called with a value argument to set the parameter globally. This behavior is not required by R7RS.</p>
 
 <h2 id="rationale">Rationale</h2>
 
 <p>
 This SRFI proposes a “PCRE-style” string syntax for Scheme Regular Expressions
-(see <a href="https://srfi.schemers.org/srfi-204/">SRFI-204</a>). Unlike existing 
-parsers with similar goals, the proposed solution features both formal syntax (described 
-via RNRS-like extended BNF notation), and well-defined semantics (providing only constructs 
+(see <a href="https://srfi.schemers.org/srfi-204/">SRFI-204</a>). Unlike existing
+parsers with similar goals, the proposed solution features both formal syntax (described
+via RNRS-like extended BNF notation), and well-defined semantics (providing only constructs
 with direct SRE equivalents).
 </p>
 
 <p>
-In contrast with PCRE syntax, SSRE syntax does not provide its own separate notation for encoding 
-non-ASCII characters, fully relying on regular Scheme string syntax for this purpose. No PCRE constructs 
-for features that are not covered by SRE specification are supported; if a SRE feature can be 
-represented by more than one PCRE construct, only the most frequently used one of each group 
-is supported by SSRE. The examples below show SSRE notation and its equivalent in SRE form (note that 
+In contrast with PCRE syntax, SSRE syntax does not provide its own separate notation for encoding
+non-ASCII characters, fully relying on regular Scheme string syntax for this purpose. No PCRE constructs
+for features that are not covered by SRE specification are supported; if a SRE feature can be
+represented by more than one PCRE construct, only the most frequently used one of each group
+is supported by SSRE. The examples below show SSRE notation and its equivalent in SRE form (note that
 multiple SRE equivalents with the exact same semantics may exist). The <code>string-sre->sre</code>
 procedure does the transformation.
 </p>
 
-<pre><code>  "\\(?(\\d{3})\\D{0,3}(\\d{3})\\D{0,3}(\\d{4})" 
-  &xrArr; (: (? #\() ($ (= 3 numeric)) (** 0 3 (~ numeric)) 
+<pre><code>  "\\(?(\\d{3})\\D{0,3}(\\d{3})\\D{0,3}(\\d{4})"
+  &xrArr; (: (? #\() ($ (= 3 numeric)) (** 0 3 (~ numeric))
         ($ (= 3 numeric)) (** 0 3 (~ numeric)) ($ (= 4 numeric)))
 
   "(?&lt;n&gt;A)(?:(?&lt;n&gt;foo)|(?&lt;n&gt;bar))\\k&lt;n&gt;"
-  &xrArr; (: (-> n #\A) (or (-> n (: #\f #\o #\o)) (-> n (: #\b #\a #\r))) 
-        (backref n)) 
-        
-  "^[^$|*+?{,}\\d-]+" 
+  &xrArr; (: (-> n #\A) (or (-> n (: #\f #\o #\o)) (-> n (: #\b #\a #\r)))
+        (backref n))
+
+  "^[^$|*+?{,}\\d-]+"
   &xrArr; (: bos (+ (~ (or #\$ #\| #\* #\+ #\? #\{ #\, #\} numeric #\-))))
 
   "(?&lt;=(?=.(?&lt;=x)))"
@@ -86,26 +86,26 @@ procedure does the transformation.
 </code></pre>
 
 <p>
-Extensions to PCRE syntax allow concise expression of operations on named character sets. 
+Extensions to PCRE syntax allow concise expression of operations on named character sets.
 If an open brace is followed by a non-digit,
-the characters following the open brace up to the matching closing brace form a 
+the characters following the open brace up to the matching closing brace form a
 “character set” notation, consisting of named sets and set operations between them. POSIX-like
 character classes have one-letter names, so the notation is concise; connecting individual
-sets with set operations allows one to express SRE expressions that are not expressable 
+sets with set operations allows one to express SRE expressions that are not expressable
 in PCRE.
 </p>
-  
+
 <pre><code>  "a{d}*" &xrArr; (: #\a (* numeric))
 
   "a{d|s}*" &xrArr; (: #\a (* (or numeric space)))
 
   "{~s}*{a}" &xrArr; (: (* (~ space)) alpha)
 
-  "{p-[.]}{1,2}" &xrArr; (** 1 2 (- punct #\.))  
+  "{p-[.]}{1,2}" &xrArr; (** 1 2 (- punct #\.))
 
-  "{{p-[.]}|a}+" &xrArr; (+ (or (- punct #\.) alpha))  
+  "{{p-[.]}|a}+" &xrArr; (+ (or (- punct #\.) alpha))
 
-  "{p-[.]|a}+" &xrArr; (+ (or (- punct #\.) alpha))  
+  "{p-[.]|a}+" &xrArr; (+ (or (- punct #\.) alpha))
 </code></pre>
 
 <p>
@@ -117,8 +117,8 @@ can accept “character class” operands; set operators are <code>~</code> (com
 
 <p>
 In addition to combining sets of characters, the “character set” notation allows one to refer
-to and combine named boundary conditions; boundary condition operators are <code>!</code> (not), 
-and <code>|</code> (or). 
+to and combine named boundary conditions; boundary condition operators are <code>!</code> (not),
+and <code>|</code> (or).
 </p>
 
 <pre><code>  ".{!b}." &xrArr; (: nonl nwb nonl)
@@ -130,14 +130,14 @@ and <code>|</code> (or).
 SRE-specific named boundaries can be written via shortcut names (<code>&lt;</code> and <code>&gt;</code>
 characters can start and end names respectively), and via their normal SRE names:
 </p>
-  
+
 <pre><code>  "{&lt;s|&ltw}." &xrArr; (: (or bos bow) nonl)
 
   "{bos|bow}." &xrArr; (: (or bos bow) nonl)
 </code></pre>
 
 <p>
-Also, the same notation can represent special named expressions:  
+Also, the same notation can represent special named expressions:
 </p>
 
 <pre><code>  "{&lt;w&gt}?" &xrArr; (? word)
@@ -146,7 +146,7 @@ Also, the same notation can represent special named expressions:
 </code></pre>
 
 <p>
-SSRE supports the most frequently used regexp options (<code>i</code>, <code>m</code>, <code>s</code>, <code>x</code>, <code>n</code>, <code>u</code>); 
+SSRE supports the most frequently used regexp options (<code>i</code>, <code>m</code>, <code>s</code>, <code>x</code>, <code>n</code>, <code>u</code>);
 they can be specified via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&hellip; notation at the start of the string or a noncapturing group:
 </p>
 
@@ -155,13 +155,13 @@ they can be specified via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&h
   "(?i:h)ello" &xrArr; (: (w/nocase #\h) #\e #\l #\l #\o)
 </code></pre>
 
-  
+
 <p>
-The set of named sets/boundary conditions/expressions can be extended via the <code>string-sre-definitions</code> 
+The set of named sets/boundary conditions/expressions can be extended via the <code>string-sre-definitions</code>
 parameter, e.g.:
 </p>
 
-<pre><code>  (string-sre-definitions 
+<pre><code>  (string-sre-definitions
     (string-sre-bind 'Any 'cset 'any
     (string-sre-bind 'Nd 'cset char-set:Nd
     (string-sre-bind 'vowel 'cset '(or #\a #\e #\i #\o #\u #\y #\w)
@@ -176,29 +176,29 @@ parameter, e.g.:
 
 <p>
 The specification below assumes the reader's familiarity with both Scheme Regular Expressions (<a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a>)
-and <a href="https://www.pcre.org/original/doc/html/pcresyntax.html">PCRE Syntax</a>. Only topics requiring special attention are discussed; 
+and <a href="https://www.pcre.org/original/doc/html/pcresyntax.html">PCRE Syntax</a>. Only topics requiring special attention are discussed;
 all PCRE constructs supported by SSRE, as defined by the formal syntax below, have their obvious SRE equivalents.
 </p>
 
 <p>
 <code>(<b>string-sre->sre</b></code> &langle;<i>string</i>&thinsp;&rangle;<code>)</code>
-    &nbsp;&nbsp;<i>procedure</i><br/>  
-This procedure converts &langle;<i>string</i>&thinsp;&rangle; in SSRE syntax to the corresponding SRE. 
+    &nbsp;&nbsp;<i>procedure</i><br/>
+This procedure converts &langle;<i>string</i>&thinsp;&rangle; in SSRE syntax to the corresponding SRE.
 If the string is not a valid SSRE, an error that satisfies <code>string-sre-syntax-error?</code> is signaled.
 </p>
 
 <p>
 <code>(<b>string-sre->regexp</b></code> &langle;<i>string</i>&thinsp;&rangle;<code>)</code>
-    &nbsp;&nbsp;<i>procedure</i><br/>  
+    &nbsp;&nbsp;<i>procedure</i><br/>
 This procedure converts &langle;<i>string</i>&thinsp;&rangle; in SSRE syntax to the corresponding regexp by
-applying the <code>regexp</code> procedure from <a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a> to the 
-conversion result. If the string is not a valid SSRE, an error that satisfies <code>string-sre-syntax-error?</code> 
+applying the <code>regexp</code> procedure from <a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a> to the
+conversion result. If the string is not a valid SSRE, an error that satisfies <code>string-sre-syntax-error?</code>
 is signaled.
 </p>
-  
+
 <p>
 <code>(<b>string-sre-syntax-error?</b></code> &langle;<i>obj</i>&thinsp;&rangle;<code>)</code>
-    &nbsp;&nbsp;<i>procedure</i><br/>  
+    &nbsp;&nbsp;<i>procedure</i><br/>
 Error type predicate. Returns <code>#t</code> if &langle;<i>obj</i>&thinsp;&rangle; is an object raised
 by the <code>string-sre->sre</code> procedure. Otherwise, returns <code>#f</code>.
 </p>
@@ -206,7 +206,7 @@ by the <code>string-sre->sre</code> procedure. Otherwise, returns <code>#f</code
 <p>
 <code>(<b>string-sre-definitions</b>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
 <code>(<b>string-sre-definitions </b></code> &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
-This procedure acts as a parameter, providing access to the list of defined entities for the <code>string-sre->sre</code> procedure. 
+This procedure acts as a parameter, providing access to the list of defined entities for the <code>string-sre->sre</code> procedure.
 The &langle;<i>bindings</i>&thinsp;&rangle; argument is either a result of calling <code>string-sre-definitions</code> with
 no arguments, or a result of calling one of the two procedures below.
 </p>
@@ -215,26 +215,26 @@ no arguments, or a result of calling one of the two procedures below.
 <code>(<b>string-sre-bind </b></code> &langle;<i>name</i>&thinsp;&rangle; &langle;<i>type</i>&thinsp;&rangle; &langle;<i>sre</i>&thinsp;&rangle; &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
 <code>(<b>string-sre-unbind </b></code> &langle;<i>name</i>&thinsp;&rangle; &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
 The &langle;<i>bindings</i>&thinsp;&rangle; argument is either a result of calling <code>string-sre-definitions</code> with no arguments, or a result of calling one of these two procedures.
-The &langle;<i>name</i>&thinsp;&rangle; argument is a symbol. The &langle;<i>type</i>&thinsp;&rangle; argument is one of the following symbols: <code>cset</code> (stands for character set), 
+The &langle;<i>name</i>&thinsp;&rangle; argument is a symbol. The &langle;<i>type</i>&thinsp;&rangle; argument is one of the following symbols: <code>cset</code> (stands for character set),
 <code>bcnd</code> (stands for boundary condition), or <code>expr</code> (stands for any SRE expression).<br>
-The first procedure creates a new &langle;<i>bindings</i>&thinsp;&rangle; object, giving a new definition for &langle;<i>name</i>&thinsp;&rangle;, replacing the old definition if any; the 
-second procedure creates a new &langle;<i>bindings</i>&thinsp;&rangle; object that has the same definitions as the original one, except for &langle;<i>name</i>&thinsp;&rangle;, 
+The first procedure creates a new &langle;<i>bindings</i>&thinsp;&rangle; object, giving a new definition for &langle;<i>name</i>&thinsp;&rangle;, replacing the old definition if any; the
+second procedure creates a new &langle;<i>bindings</i>&thinsp;&rangle; object that has the same definitions as the original one, except for &langle;<i>name</i>&thinsp;&rangle;,
 if such a definition was present; otherwise, the original bindings object is returned.
 </p>
 
 <p>
-Note that the result of the conversion depends only on the input string and the value of the <code>string-sre-definitions</code> 
-parameter. This allows implementations to cache conversion results if the converter is called with the same SSRE string repeatedly.  
+Note that the result of the conversion depends only on the input string and the value of the <code>string-sre-definitions</code>
+parameter. This allows implementations to cache conversion results if the converter is called with the same SSRE string repeatedly.
 </p>
-  
+
 <h3 id="grammar">String SRE grammar</h3>
 
 <p>
 The grammar rules for the SSRE describe the contents of the SSRE string as a sequence of characters, rather than its surface
 syntax as described in the R7RS “Formal Syntax” section. In particular, when writing actual string literals, double
-quotes and backslashes need to be escaped by prepending a backslash; non-printing characters such as newline 
-have to be either included directly or represented via one of Scheme’s string escape mechanisms. Non-ASCII 
-characters are handled in the same way; no special escape mechanism is provided for this purpose by SSRE. 
+quotes and backslashes need to be escaped by prepending a backslash; non-printing characters such as newline
+have to be either included directly or represented via one of Scheme’s string escape mechanisms. Non-ASCII
+characters are handled in the same way; no special escape mechanism is provided for this purpose by SSRE.
 </p>
 <p>
 &nbsp;&nbsp;&nbsp;&langle;<i>atmosphere</i>&hairsp;&rangle; &xrarr; &langle;<i>whitespace</i>&hairsp;&rangle; | &langle;<i>comment</i>&hairsp;&rangle;<br/>
@@ -393,10 +393,10 @@ characters are handled in the same way; no special escape mechanism is provided 
 <h3 id="named-entities">Named entities</h3>
 
 <p>
-The table below lists named character sets / boundary conditions / expressions available by default, along with their 
-types and SRE equivalents. Please note that the same named character sets are used in in all of the following: set notation, 
-named classes in character class notation <code>[:</code><i>name</i>&hairsp;<code>:]</code>, character property notations 
-<code>\p{</code><i>name</i>&hairsp;<code>}</code>, <code>\P{</code><i>name</i>&hairsp;<code>}</code>, as well as their 
+The table below lists named character sets / boundary conditions / expressions available by default, along with their
+types and SRE equivalents. Please note that the same named character sets are used in in all of the following: set notation,
+named classes in character class notation <code>[:</code><i>name</i>&hairsp;<code>:]</code>, character property notations
+<code>\p{</code><i>name</i>&hairsp;<code>}</code>, <code>\P{</code><i>name</i>&hairsp;<code>}</code>, as well as their
 single-letter variants.
 </p>
 
@@ -490,53 +490,53 @@ single-letter variants.
     <td><code></code></td><td></td><td><code></code></td></tr>
   </table>
 
-<p>Note 1: any horizontal space character. In a Unicode context this corresponds to space, tab, and any other character in 
+<p>Note 1: any horizontal space character. In a Unicode context this corresponds to space, tab, and any other character in
 the Space Separator category (Zs). In an ASCII context this corresponds to space and tab.</p>
-<p>Note 2: any vertical space character. In a Unicode context this corresponds to line feed, form feed, carriage return, 
+<p>Note 2: any vertical space character. In a Unicode context this corresponds to line feed, form feed, carriage return,
 and any other character in the Line and Paragraph Separator categories (Zl, Zp). In an ASCII context this corresponds to line feed, form feed, and carriage return.</p>
 <p>Note 3: any word character. Equivalent to <code>(or alnum #\_)</code>.</p>
-<p>Note 4: word boundary. Equivalent to  <code>(or bow eow)</code>.</p> 
+<p>Note 4: word boundary. Equivalent to  <code>(or bow eow)</code>.</p>
 
 <h3 id="cset-operators">Character set notation operators</h3>
 
 <p>
-Listed by priority, these operators go as follows: <code>|</code> has the lowest priority, <code>&</code> and <code>-</code>  
+Listed by priority, these operators go as follows: <code>|</code> has the lowest priority, <code>&</code> and <code>-</code>
 have the same (medium) priority, <code>!</code> and <code>~</code> have the highest priority.
 </p>
 
 <table>
   <tr><th align="left">Operator&nbsp;&nbsp;&nbsp;</th><th align="left">Type&nbsp;&nbsp;&nbsp;</th><th align="left">SRE</th>
-  <tr><td><code>~</code></td><td>cset&rarr;cset</td><td><code>~</code> (complement)</td></tr>  
-  <tr><td><code>&</code></td><td>cset&times;cset&rarr;cset</td><td><code>&</code> (intersection)</td></tr>  
-  <tr><td><code>|</code></td><td>cset&times;cset&rarr;cset</td><td><code>|</code> (union)</td></tr>  
-  <tr><td><code>-</code></td><td>cset&times;cset&rarr;cset</td><td><code>-</code> (set difference)</td></tr>  
-  <tr><td><code>!</code></td><td>bcnd&rarr;bcnd</td><td><code>neg-look-ahead</code> (not)</td></tr>  
-  <tr><td><code>|</code></td><td>bcnd&times;bcnd&rarr;bcnd</td><td><code>|</code> (or)</td></tr>  
+  <tr><td><code>~</code></td><td>cset&rarr;cset</td><td><code>~</code> (complement)</td></tr>
+  <tr><td><code>&</code></td><td>cset&times;cset&rarr;cset</td><td><code>&</code> (intersection)</td></tr>
+  <tr><td><code>|</code></td><td>cset&times;cset&rarr;cset</td><td><code>|</code> (union)</td></tr>
+  <tr><td><code>-</code></td><td>cset&times;cset&rarr;cset</td><td><code>-</code> (set difference)</td></tr>
+  <tr><td><code>!</code></td><td>bcnd&rarr;bcnd</td><td><code>neg-look-ahead</code> (not)</td></tr>
+  <tr><td><code>|</code></td><td>bcnd&times;bcnd&rarr;bcnd</td><td><code>|</code> (or)</td></tr>
 </table>
 
 <h3 id="options">Regexp options</h3>
 
 <p>
-Options can be specified either as optional symbol arguments to the <code>string-sre->sre</code> procedure, 
-or in the SSRE string itself via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&hellip; notation at the start of the string 
-or a noncapturing group. They have their traditional meanings. Some of them affect the way certain SSRE expressions are translated 
-into SRE, some are purely syntactical (<code>x</code>). The table below lists all of them with short descriptions; in the Translation column, 
-comma separates SRE constructs used when the option is on from their alternatives used when the option is off. 
+Options can be specified either as optional symbol arguments to the <code>string-sre->sre</code> procedure,
+or in the SSRE string itself via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&hellip; notation at the start of the string
+or a noncapturing group. They have their traditional meanings. Some of them affect the way certain SSRE expressions are translated
+into SRE, some are purely syntactical (<code>x</code>). The table below lists all of them with short descriptions; in the Translation column,
+comma separates SRE constructs used when the option is on from their alternatives used when the option is off.
 Initially all options are off except for <code>u</code>.
 </p>
 
 <table>
   <tr><th align="left">Option&nbsp;&nbsp;&nbsp;</th><th align="left">Translation</th><th align="left">Description</th>
-  <tr><td><code>i</code></td><td><code>(w/nocase &hellip;)</code>, <code>(w/case &hellip;)</code></td><td>case-insensitive matching</td></tr>  
-  <tr><td><code>m</code></td><td><code>^</code> <code>$</code> are <code>bol</code> <code>eol</code>, <code>bos</code> <code>eos</code></td><td>multiline mode</td></tr>  
-  <tr><td><code>s</code></td><td><code>.</code> is <code>any</code>, <code>nonl</code></td><td>single-line mode</td></tr>  
-  <tr><td><code>x</code></td></td><td>relaxed syntax, regular syntax</td><td>free-spacing and comments</td></tr>  
-  <tr><td><code>n</code></td><td>nothing, <code>($ &hellip;)</code></td><td>do not capture unnamed groups</td></tr>  
-  <tr><td><code>u</code></td><td><code>(w/unicode &hellip;)</code>, <code>(w/ascii &hellip;)</code></td><td>use Unicode matching</td></tr>  
+  <tr><td><code>i</code></td><td><code>(w/nocase &hellip;)</code>, <code>(w/case &hellip;)</code></td><td>case-insensitive matching</td></tr>
+  <tr><td><code>m</code></td><td><code>^</code> <code>$</code> are <code>bol</code> <code>eol</code>, <code>bos</code> <code>eos</code></td><td>multiline mode</td></tr>
+  <tr><td><code>s</code></td><td><code>.</code> is <code>any</code>, <code>nonl</code></td><td>single-line mode</td></tr>
+  <tr><td><code>x</code></td></td><td>relaxed syntax, regular syntax</td><td>free-spacing and comments</td></tr>
+  <tr><td><code>n</code></td><td>nothing, <code>($ &hellip;)</code></td><td>do not capture unnamed groups</td></tr>
+  <tr><td><code>u</code></td><td><code>(w/unicode &hellip;)</code>, <code>(w/ascii &hellip;)</code></td><td>use Unicode matching</td></tr>
 </table>
 
 <p>
-Please note that the <code>n</code> option, as expected, does not disable capturing for named capturing groups, 
+Please note that the <code>n</code> option, as expected, does not disable capturing for named capturing groups,
 and thus is not converted to SRE <code>w/nocapture</code>, which would disable all capturing.
 </p>
 
