@@ -1,8 +1,12 @@
-<!DOCTYPE html>
+<!DOC TYPE html>
 <html lang="en">
+<!--
+SPDX-FileCopyrightText: 2025 Sergei Egorov
+SPDX-License-Identifier: MIT
+-->
   <head>
     <meta charset="utf-8">
-    <title>SRFI ###: String syntax for Scheme Regular Expressions</title>
+    <title>SRFI 264: String syntax for Scheme Regular Expressions</title>
     <link href="/favicon.png" rel="icon" sizes="192x192" type="image/png">
     <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +19,7 @@
   </head>
   <body>
     <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg" 
-    alt="SRFI surfboard logo" /></a>###: String syntax for Scheme Regular Expressions</h1>
+    alt="SRFI surfboard logo" /></a>264: String syntax for Scheme Regular Expressions</h1>
 
 <p>by Sergei Egorov</p>
 
@@ -536,12 +540,12 @@ Please note that the <code>n</code> option, as expected, does not disable captur
 and thus is not converted to SRE <code>w/nocapture</code>, which would disable all capturing.
 </p>
 
-<h2 id="implementation">Reference implementation</h2>
+<h2 id="implementation">Sample implementation</h2>
 
 <p>Implementation note: </p>
 
-<a href="ssre.scm">Source for the reference implementation</a> (R6RS/R7RS).<br/>
-<a href="ssre-tests.scm">Tests</a> (ASCII only).
+<a href="srfi/:264/srfi-264.scm">Source for the sample implementation</a> (R6RS/R7RS).<br/>
+<a href="srfi/:264/srfi-264-tests.scm">Tests</a> (ASCII only).
 
 <h2 id="acknowledgements">Acknowledgements</h2>
 
