@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 -->
   <head>
     <meta charset="utf-8">
-    <title>SRFI 264: String syntax for Scheme Regular Expressions</title>
+    <title>SRFI 264: String Syntax for Scheme Regular Expressions</title>
     <link href="/favicon.png" rel="icon" sizes="192x192" type="image/png">
     <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,7 +35,7 @@ The editor will add this section.</p>
 
 <p>
 This SRFI proposes SSRE, an alternative string-based syntax
-for Scheme Regular Expressions as defined by <a href="https://srfi.schemers.org/srfi-115/">SRFI-115</a>.
+for Scheme Regular Expressions as defined by <a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a>.
 String syntax is both compact and familiar to many regexp users; it is translated directly into SRE S-expressions,
 providing equivalent constructs. While the proposed syntax mostly follows PCRE, it takes into
 account specifics of Scheme string syntax and limitations of SRE, leaving out constructs
@@ -91,7 +91,7 @@ If an open brace is followed by a non-digit,
 the characters following the open brace up to the matching closing brace form a
 “character set” notation, consisting of named sets and set operations between them. POSIX-like
 character classes have one-letter names, so the notation is concise; connecting individual
-sets with set operations allows one to express SRE expressions that are not expressable
+sets with set operations allows one to express SRE expressions that are not expressible
 in PCRE.
 </p>
 
@@ -147,7 +147,7 @@ Also, the same notation can represent special named expressions:
 
 <p>
 SSRE supports the most frequently used regexp options (<code>i</code>, <code>m</code>, <code>s</code>, <code>x</code>, <code>n</code>, <code>u</code>);
-they can be specified via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&hellip; notation at the start of the string or a noncapturing group:
+they can be specified via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&hellip; notation at the start of the string or a non-capturing group:
 </p>
 
 <pre><code>  "(?i)hello" &xrArr; (w/nocase (: #\h #\e #\l #\l #\o))
@@ -240,7 +240,7 @@ characters are handled in the same way; no special escape mechanism is provided 
 &nbsp;&nbsp;&nbsp;&langle;<i>atmosphere</i>&hairsp;&rangle; &xrarr; &langle;<i>whitespace</i>&hairsp;&rangle; | &langle;<i>comment</i>&hairsp;&rangle;<br/>
 &nbsp;&nbsp;&nbsp;&langle;<i>whitespace</i>&hairsp;&rangle; &xrarr; &langle;<i>space, tab, or newline</i>&hairsp;&rangle;<br/>
 &nbsp;&nbsp;&nbsp;&langle;<i>comment</i>&hairsp;&rangle; &xrarr; <code>#</code> &langle;<i>all subsequent characters up to a newline</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>intertoken space</i>&hairsp;&rangle; &xrarr; &langle;<i>atmosphere</i>&hairsp;&rangle;*<br/>
+&nbsp;&nbsp;&nbsp;&langle;<i>inter-token space</i>&hairsp;&rangle; &xrarr; &langle;<i>atmosphere</i>&hairsp;&rangle;*<br/>
 <br/>
 &nbsp;&nbsp;&nbsp;&langle;<i>count</i>&hairsp;&rangle; &xrarr; &langle;<i>number</i>&hairsp;&rangle;<br/>
 &nbsp;&nbsp;&nbsp;&langle;<i>number</i>&hairsp;&rangle; &xrarr; &langle;<i>digit</i>&hairsp;&rangle;<small>+</small><br/>
@@ -252,7 +252,7 @@ characters are handled in the same way; no special escape mechanism is provided 
 &nbsp;&nbsp;&nbsp;&langle;<i>name</i>&hairsp;&rangle; &xrarr; &langle;<i>name constituent</i>&hairsp;&rangle;<small>+</small><br/>
 &nbsp;&nbsp;&nbsp;&langle;<i>name constituent</i>&hairsp;&rangle; &xrarr; &langle;<i>letter</i>&hairsp;&rangle; | <code>&lt;</code> | <code>&gt;</code>   <br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; &xrarr; &langle;<i>intertoken space if x option is in effect, empty otherwise</i>&hairsp;&rangle;<br/>
+&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; &xrarr; &langle;<i>inter-token space if x option is in effect, empty otherwise</i>&hairsp;&rangle;<br/>
 <br/>
 &nbsp;&nbsp;&nbsp;&langle;<i>body regexp</i>&hairsp;&rangle; &xrarr; <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>(?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>)</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;<br/>
@@ -519,7 +519,7 @@ have the same (medium) priority, <code>!</code> and <code>~</code> have the high
 <p>
 Options can be specified either as optional symbol arguments to the <code>string-sre->sre</code> procedure,
 or in the SSRE string itself via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&hellip; notation at the start of the string
-or a noncapturing group. They have their traditional meanings. Some of them affect the way certain SSRE expressions are translated
+or a non-capturing group. They have their traditional meanings. Some of them affect the way certain SSRE expressions are translated
 into SRE, some are purely syntactical (<code>x</code>). The table below lists all of them with short descriptions; in the Translation column,
 comma separates SRE constructs used when the option is on from their alternatives used when the option is off.
 Initially all options are off except for <code>u</code>.
