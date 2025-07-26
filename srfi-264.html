@@ -1,4 +1,4 @@
-<!DOC TYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <!--
 SPDX-FileCopyrightText: 2025 Sergei Egorov
@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
      body  { line-height: 24px; }
      pre  { font-family: inherit; line-height: 20px; }
      table { border-collapse: separate; border-spacing: 1em 0; }
+     th { text-align: left; }
     </style>
   </head>
   <body>
@@ -401,9 +402,9 @@ single-letter variants.
 </p>
 
 <table>
-  <tr><th align="left">Name&nbsp;&nbsp;&nbsp;</th><th align="left">Type&nbsp;&nbsp;&nbsp;</th><th align="left">SRE</th>
-    <th align="left">Name&nbsp;&nbsp;&nbsp;</th><th align="left">Type&nbsp;&nbsp;&nbsp;</th><th align="left">SRE</th>
-    <th align="left">Name&nbsp;&nbsp;&nbsp;</th><th align="left">Type&nbsp;&nbsp;&nbsp;</th><th align="left">SRE</th></tr>
+  <tr><th>Name&nbsp;&nbsp;&nbsp;</th><th>Type&nbsp;&nbsp;&nbsp;</th><th>SRE</th>
+    <th>Name&nbsp;&nbsp;&nbsp;</th><th>Type&nbsp;&nbsp;&nbsp;</th><th>SRE</th>
+    <th>Name&nbsp;&nbsp;&nbsp;</th><th>Type&nbsp;&nbsp;&nbsp;</th><th>SRE</th></tr>
   <tr><td><code>any</code></td><td>cset</td><td><code>any</code></td>
       <td><code>_</code></td><td>cset</td><td><code>any</code></td>
       <td></td><td></td><td></td></tr>
@@ -505,7 +506,7 @@ have the same (medium) priority, <code>!</code> and <code>~</code> have the high
 </p>
 
 <table>
-  <tr><th align="left">Operator&nbsp;&nbsp;&nbsp;</th><th align="left">Type&nbsp;&nbsp;&nbsp;</th><th align="left">SRE</th>
+  <tr><th>Operator&nbsp;&nbsp;&nbsp;</th><th>Type&nbsp;&nbsp;&nbsp;</th><th>SRE</th>
   <tr><td><code>~</code></td><td>cset&rarr;cset</td><td><code>~</code> (complement)</td></tr>
   <tr><td><code>&</code></td><td>cset&times;cset&rarr;cset</td><td><code>&</code> (intersection)</td></tr>
   <tr><td><code>|</code></td><td>cset&times;cset&rarr;cset</td><td><code>|</code> (union)</td></tr>
@@ -526,7 +527,7 @@ Initially all options are off except for <code>u</code>.
 </p>
 
 <table>
-  <tr><th align="left">Option&nbsp;&nbsp;&nbsp;</th><th align="left">Translation</th><th align="left">Description</th>
+  <tr><th>Option&nbsp;&nbsp;&nbsp;</th><th>Translation</th><th>Description</th>
   <tr><td><code>i</code></td><td><code>(w/nocase &hellip;)</code>, <code>(w/case &hellip;)</code></td><td>case-insensitive matching</td></tr>
   <tr><td><code>m</code></td><td><code>^</code> <code>$</code> are <code>bol</code> <code>eol</code>, <code>bos</code> <code>eos</code></td><td>multiline mode</td></tr>
   <tr><td><code>s</code></td><td><code>.</code> is <code>any</code>, <code>nonl</code></td><td>single-line mode</td></tr>
