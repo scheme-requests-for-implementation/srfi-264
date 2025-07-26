@@ -236,157 +236,157 @@ quotes and backslashes need to be escaped by prepending a backslash; non-printin
 have to be either included directly or represented via one of Scheme’s string escape mechanisms. Non-ASCII
 characters are handled in the same way; no special escape mechanism is provided for this purpose by SSRE.
 </p>
-<p>
-&nbsp;&nbsp;&nbsp;&langle;<i>atmosphere</i>&hairsp;&rangle; &xrarr; &langle;<i>whitespace</i>&hairsp;&rangle; | &langle;<i>comment</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>whitespace</i>&hairsp;&rangle; &xrarr; &langle;<i>space, tab, or newline</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>comment</i>&hairsp;&rangle; &xrarr; <code>#</code> &langle;<i>all subsequent characters up to a newline</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>inter-token space</i>&hairsp;&rangle; &xrarr; &langle;<i>atmosphere</i>&hairsp;&rangle;*<br/>
+<p style="white-space: pre-wrap">
+&langle;<i>atmosphere</i>&hairsp;&rangle; &xrarr; &langle;<i>whitespace</i>&hairsp;&rangle; | &langle;<i>comment</i>&hairsp;&rangle;<br/>
+&langle;<i>whitespace</i>&hairsp;&rangle; &xrarr; &langle;<i>space, tab, or newline</i>&hairsp;&rangle;<br/>
+&langle;<i>comment</i>&hairsp;&rangle; &xrarr; <code>#</code> &langle;<i>all subsequent characters up to a newline</i>&hairsp;&rangle;<br/>
+&langle;<i>inter-token space</i>&hairsp;&rangle; &xrarr; &langle;<i>atmosphere</i>&hairsp;&rangle;*<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>count</i>&hairsp;&rangle; &xrarr; &langle;<i>number</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>number</i>&hairsp;&rangle; &xrarr; &langle;<i>digit</i>&hairsp;&rangle;<small>+</small><br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>digit</i>&hairsp;&rangle; &xrarr; <code>0</code> | ... | <code>9</code><br/>
+&langle;<i>count</i>&hairsp;&rangle; &xrarr; &langle;<i>number</i>&hairsp;&rangle;<br/>
+&langle;<i>number</i>&hairsp;&rangle; &xrarr; &langle;<i>digit</i>&hairsp;&rangle;<small>+</small><br/>
+&langle;<i>digit</i>&hairsp;&rangle; &xrarr; <code>0</code> | ... | <code>9</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>word</i>&hairsp;&rangle; &xrarr; &langle;<i>letter</i>&hairsp;&rangle;<small>+</small><br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>letter</i>&hairsp;&rangle; &xrarr; <code>a</code> | ... | <code>z</code> | <code>A</code> | ... | <code>Z</code> | <code>_</code><br/>
+&langle;<i>word</i>&hairsp;&rangle; &xrarr; &langle;<i>letter</i>&hairsp;&rangle;<small>+</small><br/>
+&langle;<i>letter</i>&hairsp;&rangle; &xrarr; <code>a</code> | ... | <code>z</code> | <code>A</code> | ... | <code>Z</code> | <code>_</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>name</i>&hairsp;&rangle; &xrarr; &langle;<i>name constituent</i>&hairsp;&rangle;<small>+</small><br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>name constituent</i>&hairsp;&rangle; &xrarr; &langle;<i>letter</i>&hairsp;&rangle; | <code>&lt;</code> | <code>&gt;</code>   <br/>
+&langle;<i>name</i>&hairsp;&rangle; &xrarr; &langle;<i>name constituent</i>&hairsp;&rangle;<small>+</small><br/>
+&langle;<i>name constituent</i>&hairsp;&rangle; &xrarr; &langle;<i>letter</i>&hairsp;&rangle; | <code>&lt;</code> | <code>&gt;</code>   <br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; &xrarr; &langle;<i>inter-token space if x option is in effect, empty otherwise</i>&hairsp;&rangle;<br/>
+&langle;<i>xs</i>&hairsp;&rangle; &xrarr; &langle;<i>inter-token space if x option is in effect, empty otherwise</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>body regexp</i>&hairsp;&rangle; &xrarr; <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>(?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>)</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;<br/>
+&langle;<i>body regexp</i>&hairsp;&rangle; &xrarr; <br/>
+<span style="visibility: hidden">|</span><code>(?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>)</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>alt regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>sequence regexp</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>sequence regexp</i>&hairsp;&rangle;<br/>
+&langle;<i>alt regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>sequence regexp</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>sequence regexp</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>sequence regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>quantified regexp</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>sequence regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>empty regexp</i>&hairsp;&rangle;<br/>
+&langle;<i>sequence regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>quantified regexp</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>sequence regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>empty regexp</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>empty regexp</i>&hairsp;&rangle; &xrarr; &langle;<i>xs</i>&hairsp;&rangle;<br/>
+&langle;<i>empty regexp</i>&hairsp;&rangle; &xrarr; &langle;<i>xs</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>quantified regexp</i>&hairsp;&rangle; &xrarr; <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle;*<br/>
+&langle;<i>quantified regexp</i>&hairsp;&rangle; &xrarr; <br/>
+<span style="visibility: hidden">|</span>&langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle;*<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>quantifier</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; <code>*</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; <code>+</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; <code>?</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>xs</i>&hairsp;&rangle; <code>{</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>repeat</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>}</code><br/>
+&langle;<i>quantifier</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>xs</i>&hairsp;&rangle; <code>*</code><br/>
+|&langle;<i>xs</i>&hairsp;&rangle; <code>+</code><br/>
+|&langle;<i>xs</i>&hairsp;&rangle; <code>?</code><br/>
+|&langle;<i>xs</i>&hairsp;&rangle; <code>{</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>repeat</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>}</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>repeat</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>count</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>,</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>count</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>count</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>,</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>count</i>&hairsp;&rangle;<br/>
+&langle;<i>repeat</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>count</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>,</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>count</i>&hairsp;&rangle;<br/>
+|&langle;<i>count</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>,</code><br/>
+|&langle;<i>count</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>primary regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>char regexp</i>&hairsp;&rangle;      <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>^</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>$</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>.</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>boundary shortcut</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>class shortcut</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>class regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>set regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>escaped punctuation</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>regexp shortcut</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>capture regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>group regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>lookahead regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>lookbehind regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>backref regexp</i>&hairsp;&rangle;<br/>
+&langle;<i>primary regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>char regexp</i>&hairsp;&rangle;      <br/>
+|<code>^</code><br/>
+|<code>$</code><br/>
+|<code>.</code><br/>
+|&langle;<i>boundary shortcut</i>&hairsp;&rangle;<br/>
+|&langle;<i>class shortcut</i>&hairsp;&rangle;<br/>
+|&langle;<i>class regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>set regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>escaped punctuation</i>&hairsp;&rangle;<br/>
+|&langle;<i>regexp shortcut</i>&hairsp;&rangle;<br/>
+|&langle;<i>capture regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>group regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>lookahead regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>lookbehind regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>backref regexp</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>char regexp</i>&hairsp;&rangle; &xrarr; &langle;<i>x char if x option is in effect, nonx char otherwise</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>nonx char</i>&hairsp;&rangle; &xrarr; &langle;<i>any char but <code>\</code> <code>^</code> <code>$</code> <code>.</code> <code>|</code> <code>*</code> <code>+</code> <code>?</code> <code>[</code> <code>]</code> <code>(</code> <code>)</code> <code>{</code> <code>}</code></i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>x char</i>&hairsp;&rangle; &xrarr; &langle;<i>any nonx char but <code>#</code> and whitespace</i>&hairsp;&rangle;<br/>
+&langle;<i>char regexp</i>&hairsp;&rangle; &xrarr; &langle;<i>x char if x option is in effect, nonx char otherwise</i>&hairsp;&rangle;<br/>
+&langle;<i>nonx char</i>&hairsp;&rangle; &xrarr; &langle;<i>any char but <code>\</code> <code>^</code> <code>$</code> <code>.</code> <code>|</code> <code>*</code> <code>+</code> <code>?</code> <code>[</code> <code>]</code> <code>(</code> <code>)</code> <code>{</code> <code>}</code></i>&hairsp;&rangle;<br/>
+&langle;<i>x char</i>&hairsp;&rangle; &xrarr; &langle;<i>any nonx char but <code>#</code> and whitespace</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>boundary shortcut</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>\b</code> | <code>\B</code> | <code>\</code><code>&lt;</code> | <code>\</code><code>&gt;</code> | <code>\A</code> | <code>\z</code><br/>
+&langle;<i>boundary shortcut</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>\b</code> | <code>\B</code> | <code>\</code><code>&lt;</code> | <code>\</code><code>&gt;</code> | <code>\A</code> | <code>\z</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>class regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>[^</code> &langle;<i>class body</i>&hairsp;&rangle; <code>]</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>[</code> &langle;<i>class body</i>&hairsp;&rangle; <code>]</code><br/>
+&langle;<i>class regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>[^</code> &langle;<i>class body</i>&hairsp;&rangle; <code>]</code><br/>
+|<code>[</code> &langle;<i>class body</i>&hairsp;&rangle; <code>]</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>class body</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>]</code> &langle;<i>class element</i>&hairsp;&rangle;*<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>class element</i>&hairsp;&rangle;*<br/>
+&langle;<i>class body</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>]</code> &langle;<i>class element</i>&hairsp;&rangle;*<br/>
+|&langle;<i>class element</i>&hairsp;&rangle;*<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>class element</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>[:</code> &langle;<i>class name</i>&hairsp;&rangle; <code>:]</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>class shortcut</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>class char</i>&hairsp;&rangle; <code>-</code> &langle;<i>class char</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>class char</i>&hairsp;&rangle;<br/>
+&langle;<i>class element</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>[:</code> &langle;<i>class name</i>&hairsp;&rangle; <code>:]</code><br/>
+|&langle;<i>class shortcut</i>&hairsp;&rangle;<br/>
+|&langle;<i>class char</i>&hairsp;&rangle; <code>-</code> &langle;<i>class char</i>&hairsp;&rangle;<br/>
+|&langle;<i>class char</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>class shortcut</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>\d</code> | <code>\D</code> | <code>\s</code> | <code>\S</code> | <code>\w</code> | <code>\W</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>\p</code>&langle;<i>letter</i>&hairsp;&rangle; | <code>\p</code><code>{</code> &langle;<i>class name</i>&hairsp;&rangle; <code>}</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>\P</code>&langle;<i>letter</i>&hairsp;&rangle; | <code>\P</code><code>{</code> &langle;<i>class name</i>&hairsp;&rangle; <code>}</code><br/>
+&langle;<i>class shortcut</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>\d</code> | <code>\D</code> | <code>\s</code> | <code>\S</code> | <code>\w</code> | <code>\W</code><br/>
+|<code>\p</code>&langle;<i>letter</i>&hairsp;&rangle; | <code>\p</code><code>{</code> &langle;<i>class name</i>&hairsp;&rangle; <code>}</code><br/>
+|<code>\P</code>&langle;<i>letter</i>&hairsp;&rangle; | <code>\P</code><code>{</code> &langle;<i>class name</i>&hairsp;&rangle; <code>}</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>class char</i>&hairsp;&rangle; &xrarr; <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>[.</code> &langle;<i>any character</i>&hairsp;&rangle; <code>.]</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>any character but <code>]</code> and <code>\</code></i>&hairsp;&rangle; <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>\\</code> | <code>\^</code> | <code>\-</code> | <code>\[</code> | <code>\]</code><br/>
+&langle;<i>class char</i>&hairsp;&rangle; &xrarr; <br/>
+<span style="visibility: hidden">|</span><code>[.</code> &langle;<i>any character</i>&hairsp;&rangle; <code>.]</code><br/>
+|&langle;<i>any character but <code>]</code> and <code>\</code></i>&hairsp;&rangle; <br/>
+|<code>\\</code> | <code>\^</code> | <code>\-</code> | <code>\[</code> | <code>\]</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>set regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>{</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set alt</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>}</code><br/>
+&langle;<i>set regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>{</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set alt</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>}</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>set alt</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set infix op</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>set infix op</i>&hairsp;&rangle;<br/>
+&langle;<i>set alt</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set infix op</i>&hairsp;&rangle;<br/>
+|&langle;<i>set infix op</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>set infix op</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>set prefix op</i>&hairsp;&rangle; <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>&</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>-</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
+&langle;<i>set infix op</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>set prefix op</i>&hairsp;&rangle; <br/>
+|&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>&</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
+|&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>-</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>set prefix op</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>set primary</i>&hairsp;&rangle; <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>~</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
+&langle;<i>set prefix op</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>set primary</i>&hairsp;&rangle; <br/>
+|<code>~</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
+|<code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>set primary</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>set name</i>&hairsp;&rangle; <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>class regexp</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>set regexp</i>&hairsp;&rangle;   <br/>
+&langle;<i>set primary</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>set name</i>&hairsp;&rangle; <br/>
+|&langle;<i>class regexp</i>&hairsp;&rangle;<br/>
+|&langle;<i>set regexp</i>&hairsp;&rangle;   <br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>escaped punctuation</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>\\</code> | <code>\^</code> | <code>\$</code> | <code>\.</code> | <code>\|</code> | <code>\*</code> | <code>\</code><code>+</code> | <code>\?</code> | <code>\[</code> | <code>\]</code> | <code>\(</code> | <code>\)</code> | <code>\</code><code>{</code> | <code>\</code><code>}</code> | <code>\#</code> | <code>\</code>&langle;<i>whitespace</i>&hairsp;&rangle; <br/>
+&langle;<i>escaped punctuation</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>\\</code> | <code>\^</code> | <code>\$</code> | <code>\.</code> | <code>\|</code> | <code>\*</code> | <code>\</code><code>+</code> | <code>\?</code> | <code>\[</code> | <code>\]</code> | <code>\(</code> | <code>\)</code> | <code>\</code><code>{</code> | <code>\</code><code>}</code> | <code>\#</code> | <code>\</code>&langle;<i>whitespace</i>&hairsp;&rangle; <br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>regexp shortcut</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>\X</code> | <code>\Z</code><br/>
+&langle;<i>regexp shortcut</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>\X</code> | <code>\Z</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>capture regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>(?</code><code>&lt;</code> &langle;<i>capture label</i>&hairsp;&rangle; <code>&gt;</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code> <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>(</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
+&langle;<i>capture regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>(?</code><code>&lt;</code> &langle;<i>capture label</i>&hairsp;&rangle; <code>&gt;</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code> <br/>
+|<code>(</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>group regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>(?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>:</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
+&langle;<i>group regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>(?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>:</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>lookahead regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>(?=</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>(?!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
+&langle;<i>lookahead regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>(?=</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
+|<code>(?!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>lookbehind regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>(?</code><code>&lt;</code><code>=</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>(?</code><code>&lt;</code><code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
+&langle;<i>lookbehind regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>(?</code><code>&lt;</code><code>=</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
+|<code>(?</code><code>&lt;</code><code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>backref regexp</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;<code>\</code> &langle;<i>digit</i>&hairsp;&rangle; &langle;<i>digit</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>\</code> &langle;<i>digit</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<code>\k</code><code>&lt;</code> &langle;<i>capture label</i>&hairsp;&rangle; <code>&gt;</code><br/>
+&langle;<i>backref regexp</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span><code>\</code> &langle;<i>digit</i>&hairsp;&rangle; &langle;<i>digit</i>&hairsp;&rangle;<br/>
+|<code>\</code> &langle;<i>digit</i>&hairsp;&rangle;<br/>
+|<code>\k</code><code>&lt;</code> &langle;<i>capture label</i>&hairsp;&rangle; <code>&gt;</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>regexp options</i>&hairsp;&rangle; &xrarr;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="visibility: hidden">|</span>&nbsp;&nbsp;&nbsp;&langle;<i>option letter</i>&hairsp;&rangle;*<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&langle;<i>option letter</i>&hairsp;&rangle;* <code>-</code> &langle;<i>option letter</i>&hairsp;&rangle;*<br/>
+&langle;<i>regexp options</i>&hairsp;&rangle; &xrarr;<br/>
+<span style="visibility: hidden">|</span>&langle;<i>option letter</i>&hairsp;&rangle;*<br/>
+|&langle;<i>option letter</i>&hairsp;&rangle;* <code>-</code> &langle;<i>option letter</i>&hairsp;&rangle;*<br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>option letter</i>&hairsp;&rangle; &xrarr; <code>i</code> | <code>m</code> | <code>s</code> | <code>x</code> | <code>n</code> | <code>u</code><br/>
+&langle;<i>option letter</i>&hairsp;&rangle; &xrarr; <code>i</code> | <code>m</code> | <code>s</code> | <code>x</code> | <code>n</code> | <code>u</code><br/>
 <br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>capture label</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>class name</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;<br/>
-&nbsp;&nbsp;&nbsp;&langle;<i>set name</i>&hairsp;&rangle; &xrarr; &langle;<i>name</i>&hairsp;&rangle;<br/>
+&langle;<i>capture label</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;<br/>
+&langle;<i>class name</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;<br/>
+&langle;<i>set name</i>&hairsp;&rangle; &xrarr; &langle;<i>name</i>&hairsp;&rangle;<br/>
 <br/>
 </p>
 
