@@ -1,3 +1,6 @@
+;;; SPDX-FileCopyrightText: 2025 Sergei Egorov
+;;; SPDX-License-Identifier: MIT
+
 (import (scheme base) (srfi 64) (srfi 264))
 
 ; SRFI 264 Tests (borrowed from many sources)
