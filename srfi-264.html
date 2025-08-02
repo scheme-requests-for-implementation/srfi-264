@@ -252,11 +252,11 @@ characters are handled in the same way; no special escape mechanism is provided 
 &langle;<i>letter</i>&hairsp;&rangle; &xrarr; <code>a</code> | ... | <code>z</code> | <code>A</code> | ... | <code>Z</code> | <code>_</code>
 
 &langle;<i>name</i>&hairsp;&rangle; &xrarr; &langle;<i>name constituent</i>&hairsp;&rangle;<small>+</small>
-&langle;<i>name constituent</i>&hairsp;&rangle; &xrarr; &langle;<i>letter</i>&hairsp;&rangle; | <code>&lt;</code> | <code>&gt;</code>   
+&langle;<i>name constituent</i>&hairsp;&rangle; &xrarr; &langle;<i>letter</i>&hairsp;&rangle; | <code>&lt;</code> | <code>&gt;</code>
 
 &langle;<i>xs</i>&hairsp;&rangle; &xrarr; &langle;<i>inter-token space if x option is in effect, empty otherwise</i>&hairsp;&rangle;
 
-&langle;<i>body regexp</i>&hairsp;&rangle; &xrarr; 
+&langle;<i>body regexp</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>xs</i>&hairsp;&rangle; <code>(?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>)</code> &langle;<i>body regexp</i>&hairsp;&rangle;
 | &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle;
 
@@ -270,7 +270,7 @@ characters are handled in the same way; no special escape mechanism is provided 
 
 &langle;<i>empty regexp</i>&hairsp;&rangle; &xrarr; &langle;<i>xs</i>&hairsp;&rangle;
 
-&langle;<i>quantified regexp</i>&hairsp;&rangle; &xrarr; 
+&langle;<i>quantified regexp</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle;<small>*</small>
 
 &langle;<i>quantifier</i>&hairsp;&rangle; &xrarr;
@@ -285,7 +285,7 @@ characters are handled in the same way; no special escape mechanism is provided 
 | &langle;<i>count</i>&hairsp;&rangle;
 
 &langle;<i>primary regexp</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>char regexp</i>&hairsp;&rangle;      
+<span style="visibility: hidden">| </span>&langle;<i>char regexp</i>&hairsp;&rangle;
 | <code>^</code>
 | <code>$</code>
 | <code>.</code>
@@ -327,9 +327,9 @@ characters are handled in the same way; no special escape mechanism is provided 
 | <code>\p</code>&langle;<i>letter</i>&hairsp;&rangle; | <code>\p</code><code>{</code> &langle;<i>class name</i>&hairsp;&rangle; <code>}</code>
 | <code>\P</code>&langle;<i>letter</i>&hairsp;&rangle; | <code>\P</code><code>{</code> &langle;<i>class name</i>&hairsp;&rangle; <code>}</code>
 
-&langle;<i>class char</i>&hairsp;&rangle; &xrarr; 
+&langle;<i>class char</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span><code>[.</code> &langle;<i>any character</i>&hairsp;&rangle; <code>.]</code>
-| &langle;<i>any character but <code>]</code> and <code>\</code></i>&hairsp;&rangle; 
+| &langle;<i>any character but <code>]</code> and <code>\</code></i>&hairsp;&rangle;
 | <code>\\</code> | <code>\^</code> | <code>\-</code> | <code>\[</code> | <code>\]</code>
 
 &langle;<i>set regexp</i>&hairsp;&rangle; &xrarr;
@@ -340,28 +340,28 @@ characters are handled in the same way; no special escape mechanism is provided 
 | &langle;<i>set infix op</i>&hairsp;&rangle;
 
 &langle;<i>set infix op</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>set prefix op</i>&hairsp;&rangle; 
+<span style="visibility: hidden">| </span>&langle;<i>set prefix op</i>&hairsp;&rangle;
 | &langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>&</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
 | &langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>-</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
 
 &langle;<i>set prefix op</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>set primary</i>&hairsp;&rangle; 
+<span style="visibility: hidden">| </span>&langle;<i>set primary</i>&hairsp;&rangle;
 | <code>~</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
 | <code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
 
 &langle;<i>set primary</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>set name</i>&hairsp;&rangle; 
+<span style="visibility: hidden">| </span>&langle;<i>set name</i>&hairsp;&rangle;
 | &langle;<i>class regexp</i>&hairsp;&rangle;
-| &langle;<i>set regexp</i>&hairsp;&rangle;   
+| &langle;<i>set regexp</i>&hairsp;&rangle;
 
 &langle;<i>escaped punctuation</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span><code>\\</code> | <code>\^</code> | <code>\$</code> | <code>\.</code> | <code>\|</code> | <code>\<span style="position: relative; top: 0.2em;">*</span></code> | <code>\</code><code>+</code> | <code>\?</code> | <code>\[</code> | <code>\]</code> | <code>\(</code> | <code>\)</code> | <code>\</code><code>{</code> | <code>\</code><code>}</code> | <code>\#</code> | <code>\</code>&langle;<i>whitespace</i>&hairsp;&rangle; 
+<span style="visibility: hidden">| </span><code>\\</code> | <code>\^</code> | <code>\$</code> | <code>\.</code> | <code>\|</code> | <code>\<span style="position: relative; top: 0.2em;">*</span></code> | <code>\</code><code>+</code> | <code>\?</code> | <code>\[</code> | <code>\]</code> | <code>\(</code> | <code>\)</code> | <code>\</code><code>{</code> | <code>\</code><code>}</code> | <code>\#</code> | <code>\</code>&langle;<i>whitespace</i>&hairsp;&rangle;
 
 &langle;<i>regexp shortcut</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span><code>\X</code> | <code>\Z</code>
 
 &langle;<i>capture regexp</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span><code>(?</code><code>&lt;</code> &langle;<i>capture label</i>&hairsp;&rangle; <code>&gt;</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code> 
+<span style="visibility: hidden">| </span><code>(?</code><code>&lt;</code> &langle;<i>capture label</i>&hairsp;&rangle; <code>&gt;</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code>
 | <code>(</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>alt regexp</i>&hairsp;&rangle; <code>)</code>
 
 &langle;<i>group regexp</i>&hairsp;&rangle; &xrarr;

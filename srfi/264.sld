@@ -2,7 +2,7 @@
 ;;; SPDX-License-Identifier: MIT
 
 (define-library (srfi 264)
-  (export string-sre->sre string-sre->regexp string-sre-syntax-error? 
+  (export string-sre->sre string-sre->regexp string-sre-syntax-error?
           string-sre-definitions string-sre-bind string-sre-unbind )
   (import (scheme base) (scheme char) (scheme cxr) (srfi 39) (srfi 115))
 
@@ -13,7 +13,7 @@
 ;
 ;========================================================================================
 
-; Helpers 
+; Helpers
 
 (define-syntax receive
   (syntax-rules ()
@@ -27,7 +27,7 @@
 (define (ormap p l)
   (and (pair? l) (or (p (car l)) (ormap p (cdr l)))))
 
-(define (decimal c) 
+(define (decimal c)
   (- (char->integer c) (char->integer #\0)))
 
 (define (fail s msg . args)
@@ -45,7 +45,7 @@
     (cond ((null? s) s)
           ((char-whitespace? (car s)) (loop (cdr s)))
           ((eqv? (car s) #\#)
-            (let lp ((s (cdr s))) 
+            (let lp ((s (cdr s)))
               (cond ((null? s) s) ((eqv? (car s) #\newline) (loop (cdr s))) (else (lp (cdr s))))))
           (else s))))
 
@@ -59,14 +59,14 @@
 ; Option flags are symbols from the {i, m, s, x, n, u} set
 
 (define o-set? memq)
-(define (o-add f o) 
+(define (o-add f o)
   (if (memq f o) o (cons f o)))
-(define (o-del f o) 
-  (cond ((null? o) o) 
+(define (o-del f o)
+  (cond ((null? o) o)
         ((eq? f (car o)) (o-del f (cdr o)))
         (else (cons (car o) (o-del f (cdr o))))))
 (define (o-lookup n o)
-  (cond ((null? o) #f) 
+  (cond ((null? o) #f)
         ((and (pair? (car o)) (eq? n (caar o))) (car o))
         (else (o-lookup n (cdr o)))))
 (define (o-skip s o)
@@ -91,39 +91,39 @@
 (define (e-dot o) (if (o-set? 's o) 'any 'nonl))
 (define (e-char c) c)
 (define (e-cset cs) cs)
-(define (e-shortcut c s) 
+(define (e-shortcut c s)
   (case c ((#\\ #\^ #\$ #\. #\| #\* #\+ #\? #\[ #\] #\( #\) #\{ #\}) c)
           ((#\b) '(or bow eow)) ((#\B) 'nwb) ((#\<) 'bow) ((#\>) 'eow) ((#\A) 'bos) ((#\z) 'eos)
-          ((#\d) 'numeric) ((#\D) '(~ numeric)) ((#\s) 'space) ((#\S) '(~ space)) 
+          ((#\d) 'numeric) ((#\D) '(~ numeric)) ((#\s) 'space) ((#\S) '(~ space))
           ((#\w) '(or alnum #\_)) ((#\W) '(~ (or alnum #\_)))
           ((#\X) 'grapheme) ((#\Z) '(: (? #\newline) eos)) ;NB: full regexps
           (else (cond ((or (char-whitespace? c) (eqv? c #\#)) c) ; for x mode
                       ((char-numeric? c) (list 'backref (decimal c)))
                       (else (fail s (string-append "non-supported escape: \\" (string c))))))))
-(define (e-class-shortcut c s) 
+(define (e-class-shortcut c s)
   (case c ((#\\ #\^ #\- #\[ #\]) c)
-          ((#\d) 'numeric) ((#\D) '(~ numeric)) ((#\s) 'space) ((#\S) '(~ space)) 
+          ((#\d) 'numeric) ((#\D) '(~ numeric)) ((#\s) 'space) ((#\S) '(~ space))
           ((#\w) '(or alnum #\_)) ((#\W) '(~ (or alnum #\_)))
-          (else (cond ((or (char-whitespace? c) (eqv? c #\#)) c) 
+          (else (cond ((or (char-whitespace? c) (eqv? c #\#)) c)
                       (else (fail s (string-append "non-supported class escape: \\" (string c))))))))
 
 (define (with-e wl e)
   (if (null? wl) e (list (car wl) (with-e (cdr wl) e))))
-(define (or-e e1 e2) 
+(define (or-e e1 e2)
   (if (and (pair? e1) (eqv? (car e1) 'or))
       (append e1 (list e2))
       (list 'or e1 e2)))
-(define (and-e e1 e2) 
+(define (and-e e1 e2)
   (cond ((and (pair? e1) (eqv? (car e1) 'and))
          (append e1 (list e2)))
         ((and (pair? e2) (eqv? (car e2) '~))
          (list '- e1 (cadr e2)))
         (else (list 'and e1 e2))))
-(define (diff-e e1 e2) 
+(define (diff-e e1 e2)
   (if (and (pair? e1) (eqv? (car e1) 'diff))
       (append e1 (list e2))
       (list '- e1 e2)))
-(define (range-e e1 e2) 
+(define (range-e e1 e2)
  (list 'char-range e1 e2))
 (define (inv-e e)
   (list '~ e))
@@ -139,7 +139,7 @@
         ((and (pair? e) (eq? (car e) 'neg-look-behind))
           (list 'look-behind (cadr e)))
         (else (list 'neg-look-ahead e))))
-(define (conc-e e1 e2) 
+(define (conc-e e1 e2)
   (if (and (pair? e1) (eqv? (car e1) ':))
       (append e1 (list e2))
       (list ': e1 e2)))
@@ -154,10 +154,10 @@
 ; of the ** repeat can be #f (standing in for infinity); this extension is supported
 ; by Alex Shinn's reference implementation for both ** and **?, which makes it unnecessary
 ; to have nongreedy version of >= and/or duplicate repeated expression as a workaround
-; If your SRE implementation does not support it, you may use (: e (*? e)) for +? and 
+; If your SRE implementation does not support it, you may use (: e (*? e)) for +? and
 ; (: (**? m m e) (*? e)) for +=? if not for the fact that duplicated groups will not
 ; be counted properly
-(define (opt-e e) 
+(define (opt-e e)
   (if (pair? e)
       (case (car e)
         ((?)  `(?? ,(cadr e)))
@@ -169,7 +169,7 @@
         (else `(? ,e)))
       (list '? e)))
 (define (pre-e e e1)
-  (list e e1)) 
+  (list e e1))
 (define (group-e e) (list '$ e))
 (define (ungroup-e e) (if (and (= (length e) 2) (eq? (car e) '$)) (cadr e) e))
 (define (namegroup-e name e) (list '-> name e))
@@ -179,14 +179,14 @@
 
 (define (cs-e) '(or))
 (define (cs-char c) (list 'or c))
-(define (cs-union cs1 cs2) 
+(define (cs-union cs1 cs2)
   (cond ((equal? cs1 '(or)) cs2)
         ((and (pair? cs2) (eq? (car cs2) 'or) (pair? cs1) (eq? (car cs1) 'or)) (append cs2 (cdr cs1)))
         ((and (pair? cs2) (eq? (car cs2) 'or)) (append cs2 (list cs1)))
         (else (list 'or cs1 cs2))))
 (define (cs-complement cs) (list '~ cs))
 (define (cs-range c1 c2) (list 'char-range c1 c2))
-(define (cs-flatten cs)         
+(define (cs-flatten cs)
   (if (and (= (length cs) 2) (eq? (car cs) 'or)) (cadr cs) cs))
 
 
@@ -195,7 +195,7 @@
 (define (parse-re-spec src o) ;=> e, s
   (define (parse-body s o) ;=> e, s
     (let ((s0 (prefix? "(?" s)))
-      (if (and s0 (pair? s0) (or (char-alphabetic? (car s0)) (eqv? (car s0) #\-))) 
+      (if (and s0 (pair? s0) (or (char-alphabetic? (car s0)) (eqv? (car s0) #\-)))
           (receive (s1 o1) (parse-re-options s0 o)
             (if (prefix? ")" s1) ; allow for more than one (?o*) leader
                 (receive (e s2) (parse-body (o-skip (cdr s1) o1) o1)
@@ -220,7 +220,7 @@
                   (values e s)
                   (receive (e1 s1) (parse-quant s o)
                     (loop (conc-e e e1) (o-skip s1 o)))))))))
-  (define (set-start? s o) 
+  (define (set-start? s o)
     (and (pair? s) (eqv? (car s) obrc)
          (let ((s (o-skip (cdr s) o)))
            (and (pair? s) (not (char-numeric? (car s)))))))
@@ -230,8 +230,8 @@
         (if (or (null? s) (set-start? s o))
             (values e s)
             (case (car s)
-              ((#\*) (loop (star-e e) (o-skip (cdr s) o))) 
-              ((#\+) (loop (plus-e e) (o-skip (cdr s) o))) 
+              ((#\*) (loop (star-e e) (o-skip (cdr s) o)))
+              ((#\+) (loop (plus-e e) (o-skip (cdr s) o)))
               ((#\?) (loop (opt-e e) (o-skip (cdr s) o)))
               ((#\{) (receive (e s) (parse-repeat e (cdr s) o) (loop e (o-skip s o))))
               (else (values e s)))))))
@@ -261,7 +261,7 @@
       ((eqv? (car s) opar)
        (receive (e s) (parse-alt (cdr s) o)
          (unless (prefix? ")" s) (fail s "missing )"))
-         (values (if (o-set? 'n o) e (group-e e)) (cdr s)))) 
+         (values (if (o-set? 'n o) e (group-e e)) (cdr s))))
       ((eqv? (car s) obrk)
        (receive (cs s) (parse-re-class (cdr s) o)
          (unless (prefix? "]" s) (fail s "missing ]"))
@@ -281,7 +281,7 @@
       ((and (eqv? (car s) #\\) (pair? (cdr s)))
        (values (e-shortcut (cadr s) s) (cddr s)))
       ((memv (car s) '(#\\ #\^ #\$ #\. #\| #\* #\+ #\? #\[ #\] #\( #\) #\{ #\}))
-       (fail s (string-append "misplaced/unescaped punctuation char: " (string (car s))))) 
+       (fail s (string-append "misplaced/unescaped punctuation char: " (string (car s)))))
       (else (values (e-char (car s)) (cdr s)))))
   (define (parse-lookaround s o e-fn neg?)
     (receive (e s) (parse-alt s o)
@@ -305,7 +305,7 @@
           ((eqv? (car s) #\x) (loop (cdr s) (if minus (o-del 'x o) (o-add 'x o)) minus))
           ((eqv? (car s) #\n) (loop (cdr s) (if minus (o-del 'n o) (o-add 'n o)) minus))
           ((eqv? (car s) #\u) (loop (cdr s) (if minus (o-del 'u o) (o-add 'u o)) minus))
-          ((and (eqv? (car s) #\-) minus) (fail s "extra - in optons")) 
+          ((and (eqv? (car s) #\-) minus) (fail s "extra - in optons"))
           ((eqv? (car s) #\-) (loop (cdr s) o #t))
           (else (fail s "unsupported option flag:" (car s))))))
 
@@ -318,7 +318,7 @@
           ((let ((s (o-skip s o))) (and (pair? s) (eqv? (car s) #\,)))
            (when comma (fail s "extra comma in repeat"))
            (when (not m) (fail s "missing range start in repeat"))
-           (loop (o-skip (cdr (o-skip s o)) o) m n #t)) 
+           (loop (o-skip (cdr (o-skip s o)) o) m n #t))
           ((and comma (char-numeric? (car s)))
            (loop (cdr s) m (let ((d (decimal (car s)))) (if n (+ (* n 10) d) d)) #t))
           ((char-numeric? (car s))
@@ -330,19 +330,19 @@
          (receive (w s1) (parse-word (cdr s))
            (unless (prefix? "}" s1) (fail s1 "missing } after name"))
            (receive (t e) (ref-named-expr w o (cdr s))
-             (unless (eq? t 'cset) 
+             (unless (eq? t 'cset)
                (fail (cdr s) (string-append "unknown named charset: " (symbol->string w))))
              (values (if inv? (inv-e e) e) (cdr s1)))))
         ((and (pair? s) (or (char-alphabetic? (car s)) (eqv? (car s) #\_)))
          (let ((w (string->symbol (string (car s)))))
            (receive (t e) (ref-named-expr w o s)
-             (unless (eq? t 'cset) 
+             (unless (eq? t 'cset)
                (fail s (string-append "unknown named charset: " (symbol->string w))))
              (values (if inv? (inv-e e) e) (cdr s)))))
         (else (fail s (string-append "missing charset name")))))
 
 (define (parse-re-class src o) ;=> cs, src
-  (define (range-rhs? s) 
+  (define (range-rhs? s)
     (and (pair? s) (eqv? (car s) #\-) (pair? (cdr s)) (not (eqv? (cadr s) cbrk))))
   (define (invalid-range s) (fail s "invalid range"))
   (define (parse-char s otherwise) ;=> c, s | (otherwise)
@@ -351,7 +351,7 @@
           ((prefix? "[:" s) (otherwise s))
           ((and (pair? s) (not (eqv? (car s) cbrk)) (not (eqv? (car s) #\\))) (values (car s) (cdr s)))
           ((and (pair? s) (eqv? (car s) #\\) (pair? (cdr s)) (memv (cadr s) '(#\\ #\^ #\- #\[ #\])))
-           (values (cadr s) (cddr s))) 
+           (values (cadr s) (cddr s)))
           (else (otherwise s))))
   (define (parse-class-element s) ;=> cs, s
     (cond ((prefix? "[:" s)
@@ -389,10 +389,10 @@
 
 (define (parse-re-set src o) ;=> t, e, s
   (define (check-cset t e s op)
-    (unless (eq? t 'cset) 
+    (unless (eq? t 'cset)
       (fail s (string-append op " applied no non-cset argument") e s)))
   (define (check-bcnd t e s op)
-    (unless (eq? t 'bcnd) 
+    (unless (eq? t 'bcnd)
       (fail s (string-append op " applied no non-bcnd argument") e s)))
   (define (parse-or s o) ;=> t, e, s
     (receive (t e s) (parse-in s o)
@@ -420,11 +420,11 @@
               (else (values t e s))))))
   (define (parse-pre s o) ;=> t, e, s
     (let loop ((s (o-skip s o)))
-      (cond ((and (pair? s) (eqv? (car s) #\~)) 
+      (cond ((and (pair? s) (eqv? (car s) #\~))
              (receive (t e s1) (loop (o-skip (cdr s) o))
                (check-cset t e (cdr s) "~")
               (values 'cset (inv-e e) s1)))
-            ((and (pair? s) (eqv? (car s) #\!)) 
+            ((and (pair? s) (eqv? (car s) #\!))
              (receive (t e s1) (loop (o-skip (cdr s) o))
                (check-bcnd t e (cdr s) "!")
                (values 'bcnd (not-e e) s1)))
@@ -459,10 +459,10 @@
 
 
 (define named-exprs '(
-  (/ cset #\\)       
+  (/ cset #\\)
   (^ cset #\^)
   (any cset any)       (_ cset any)
-  (digit cset numeric) (n cset numeric) (d cset numeric) 
+  (digit cset numeric) (n cset numeric) (d cset numeric)
   (lower cset lower)   (l cset lower)
   (upper cset upper)   (u cset upper)
   (alpha cset alpha)   (a cset alpha)
@@ -485,7 +485,7 @@
   (eow bcnd eow) (w> bcnd eow) (> bcnd eow)
   (bog bcnd bog) (<g bcnd bog)
   (eog bcnd eog) (g> bcnd eog)
-  (wb bcnd (or bow eow)) (b bcnd (or bow eow)) 
+  (wb bcnd (or bow eow)) (b bcnd (or bow eow))
   (nwb bcnd nwb)
   (<w> expr word)
   (<g> expr grapheme) (X expr grapheme)
@@ -496,7 +496,7 @@
         (else (fail s (string-append "name not defined: " (symbol->string name))))))
 
 ; definitions are wrapped into a ds structure with 2 extra slots to contain cached data;
-; cache #1 is for string-sre->sre, cache #2 for string-sre->regexp 
+; cache #1 is for string-sre->sre, cache #2 for string-sre->regexp
 
 (define (make-ds nes) (vector nes '() '()))
 (define (ds-nes ds) (vector-ref ds 0))
@@ -506,8 +506,8 @@
 (define (cache-slot ds cno str)
   (define rcl (ds-cache ds cno))
   (let loop ((cl rcl) (prevcl #f) (n 0))
-    (if (pair? cl) 
-        (if (string=? (caar cl) str) 
+    (if (pair? cl)
+        (if (string=? (caar cl) str)
             (car cl)
             (loop (cdr cl) cl (+ n 1)))
         (let ((cs (cons str #f)))
@@ -515,11 +515,11 @@
           (set-ds-cache! ds cno (cons cs rcl))
           cs))))
 
-; NB: We assume that parameters follow the protocol described in SRFI-39, namely that 
-; a parameter procedure can be called with a value argument to set the parameter globally. 
-; This behavior is not required by R7RS. 
+; NB: We assume that parameters follow the protocol described in SRFI-39, namely that
+; a parameter procedure can be called with a value argument to set the parameter globally.
+; This behavior is not required by R7RS.
 
-(define string-sre-definitions 
+(define string-sre-definitions
   (make-parameter (make-ds named-exprs)))
 
 (define (string-sre-bind n t e ds)
@@ -539,7 +539,7 @@
     (set! m (string-append m "\n" str "\n" (make-string p #\space) "^")))
   (apply error m args))
 
-(define (string-sre-syntax-error? x) 
+(define (string-sre-syntax-error? x)
   (and (list? x) (= (length x) 4) (eq? (car x) 'string-sre->sre)
        (string? (cadr x)) (string? (caddr x)) (list? (cadddr x))))
 

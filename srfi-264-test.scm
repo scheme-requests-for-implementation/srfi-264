@@ -4,7 +4,7 @@
 
 (define (ssre->sre/opts s . o*)
   (if (pair? o*)
-      (let* ((os (apply string-append (map symbol->string o*))) 
+      (let* ((os (apply string-append (map symbol->string o*)))
              (s (string-append "(?" os ")" s)))
         (string-sre->sre s))
       (string-sre->sre s)))
@@ -15,7 +15,7 @@
      (test-equal 'res (apply ssre->sre/opts 'pat 'o*)))))
 
 ; add some random definitions to pass the tests
-(string-sre-definitions 
+(string-sre-definitions
   (string-sre-bind 'Any 'cset 'any
   (string-sre-bind 'Nd 'cset 'numeric
   (string-sre-bind 'vowel 'cset '(or #\a #\e #\i #\o #\u #\y #\w)
@@ -23,7 +23,7 @@
   (string-sre-bind 'L 'cset 'alpha
   (string-sre-bind 'Ll 'cset 'lower
   (string-sre-bind 'Lu 'cset 'upper
-  (string-sre-definitions)))))))))     
+  (string-sre-definitions)))))))))
 
 (test-begin "srfi-257")
 
@@ -1368,7 +1368,7 @@
 (test-ssre "[a]" () #\a)
 (test-ssre "[^a]" () (~ #\a))
 (test-ssre "(?<=C\n)^" () (: (look-behind (: #\C #\newline)) bos))
-(test-ssre "\\w+(?=\t)" () (: (+ (or alnum #\_)) (look-ahead #\tab))) 
+(test-ssre "\\w+(?=\t)" () (: (+ (or alnum #\_)) (look-ahead #\tab)))
 
 ;; new set notation tests
 
