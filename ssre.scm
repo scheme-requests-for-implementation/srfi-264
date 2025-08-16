@@ -162,21 +162,22 @@
   (cond ((not n) (list '>= m e))
         ((eqv? m n) (list '= m e))
         (else (list '** m n e))))
-; NB: here we rely on a 'hidden feature' of the SRE specification: the second counter
-; of the ** repeat can be #f (standing in for infinity); this extension is supported
-; by Alex Shinn's reference implementation for both ** and **?, which makes it unnecessary
-; to have nongreedy version of >= and/or duplicate repeated expression as a workaround
-; If your SRE implementation does not support it, you may use (: e (*? e)) for +? and
-; (: (**? m m e) (*? e)) for +=? if not for the fact that duplicated groups will not
-; be counted properly
+; NB: if your implementation of the SRE SRFI supports infinite upper bounds in the
+; **/**? forms, return the corresponding SRE value; otherwise, uncomment the 'fail'
+; variants. Here we assume that such a bound is denoted by #f, as in IrRegex and
+; Alex Shinn's reference implementation
+(define (infub) #f) ; e.g. #f, fx-greatest, +inf.0, ...
+(define (infub? x) (eqv? x #f))
+; (define (infub) (fail "no support for infinite upper bounds in **/**?"))
+; (define (infub? x) #f)
 (define (opt-e e)
   (if (pair? e)
       (case (car e)
         ((?)  `(?? ,(cadr e)))
         ((*)  `(*? ,(cadr e)))
-        ((+)  `(**? 1 #f ,(cadr e))) ; see note above
+        ((+)  `(**? 1 ,(infub) ,(cadr e))) ; see note above
         ((=)  `(**? ,(cadr e) ,(cadr e) ,(caddr e)))
-        ((>=) `(**? ,(cadr e) #f ,(caddr e))) ; see note above
+        ((>=) `(**? ,(cadr e) ,(infub) ,(caddr e))) ; see note above
         ((**) `(**? ,@(cdr e)))
         (else `(? ,e)))
       (list '? e)))
@@ -633,11 +634,12 @@
         ((and (headed-list? r '>= 'at-least) (>= (length r) 2) (count? (cadr r)))
          (cvt `(** ,(cadr r) #f . ,(cddr r))))
         ((and (headed-list? r '** 'repeated)
-              (>= (length r) 3) (count? (cadr r)) (or (count? (caddr r)) (not (caddr r))))
+              (>= (length r) 3) (count? (cadr r)) (or (count? (caddr r)) (infub? (caddr r))))
          (if (and (eqv? (cadr r) 1) (eqv? (caddr r) 1))
              (cvt (arg-or-seq (cdddr r)))
              (receive (cr ct) (cvt (arg-or-seq (cdddr r)))
-               (values `(** ,(cadr r) ,(caddr r) ,(cast cr ct 'expr)) 'expr))))
+               (define ub (if (infub? (caddr r)) #f (caddr r)))
+               (values `(** ,(cadr r) ,ub ,(cast cr ct 'expr)) 'expr))))
         ((headed-list? r orsym 'or)
          (let loop ((l (cdr r)) (rl '()) (tl '()))
            (if (null? l) (finalize-or (reverse rl) (reverse tl))
@@ -688,11 +690,12 @@
         ((headed-list? r '?? 'non-greedy-optional)
          (cvt `(**? 0 1 . ,(cdr r))))
         ((and (headed-list? r '**? 'non-greedy-repeated)
-              (>= (length r) 3) (count? (cadr r)) (or (count? (caddr r)) (not (caddr r))))
+              (>= (length r) 3) (count? (cadr r)) (or (count? (caddr r)) (infub? (caddr r))))
          (if (and (eqv? (cadr r) 1) (eqv? (caddr r) 1))
              (cvt (arg-or-seq (cdddr r)))
              (receive (cr ct) (cvt (arg-or-seq (cdddr r)))
-               (values `(**? ,(cadr r) ,(caddr r) ,(cast cr ct 'expr)) 'expr))))
+               (define ub (if (infub? (caddr r)) #f (caddr r)))
+               (values `(**? ,(cadr r) ,ub ,(cast cr ct 'expr)) 'expr))))
         ((headed-list? r 'look-ahead 'look-behind 'neg-look-ahead 'neg-look-behind)
          (receive (cr ct) (cvt (arg-or-seq (cdr r)))
            ; in truth, all lookarounds are boundary conditions, but we only want to keep a small

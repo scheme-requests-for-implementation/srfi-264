@@ -276,7 +276,9 @@ characters are handled in the same way; no special escape mechanism is provided 
 &langle;<i>empty regexp</i>&hairsp;&rangle; &xrarr; &langle;<i>xs</i>&hairsp;&rangle;
 
 &langle;<i>quantified regexp</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle;<small>*</small>
+<span style="visibility: hidden">| </span>&langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle; <code>?</code>
+| &langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle;
+| &langle;<i>primary regexp</i>&hairsp;&rangle;
 
 &langle;<i>quantifier</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>xs</i>&hairsp;&rangle; <code><span style="position: relative; top: 0.2em;">*</span></code>
@@ -345,18 +347,18 @@ characters are handled in the same way; no special escape mechanism is provided 
 | &langle;<i>set alt</i>&hairsp;&rangle;
 
 &langle;<i>set alt</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set infix op</i>&hairsp;&rangle;
-| &langle;<i>set infix op</i>&hairsp;&rangle;
+<span style="visibility: hidden">| </span>&langle;<i>set infix</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set alt</i>&hairsp;&rangle;
+| &langle;<i>set infix</i>&hairsp;&rangle;
 
-&langle;<i>set infix op</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>set prefix op</i>&hairsp;&rangle;
-| &langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>&</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
-| &langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>-</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
+&langle;<i>set infix</i>&hairsp;&rangle; &xrarr;
+<span style="visibility: hidden">| </span>&langle;<i>set prefix</i>&hairsp;&rangle;
+| &langle;<i>set infix</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>&</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
+| &langle;<i>set infix</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>-</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
 
-&langle;<i>set prefix op</i>&hairsp;&rangle; &xrarr;
+&langle;<i>set prefix</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>set primary</i>&hairsp;&rangle;
-| <code>~</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
-| <code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
+| <code>~</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
+| <code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
 
 &langle;<i>set primary</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>set name</i>&hairsp;&rangle;
@@ -398,7 +400,13 @@ characters are handled in the same way; no special escape mechanism is provided 
 &langle;<i>capture label</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;
 &langle;<i>class name</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;
 &langle;<i>set name</i>&hairsp;&rangle; &xrarr; &langle;<i>name</i>&hairsp;&rangle;
+</p>
 
+<p>Note that translation of non-greedy repeats with a non-zero lower bound and infinite upper bound
+(e.g. <code>x+?</code> or <code>x{2,}?</code>) is implementation-dependent. Systems that support the
+corresponding extended SRE forms (e.g. by providing a way to specify the infinite upper bound in the
+<code>**?</code> form) are encouraged to implement the translation as well; otherwise these forms
+are errors.
 </p>
 
 <h3 id="named-entities">Named entities</h3>
