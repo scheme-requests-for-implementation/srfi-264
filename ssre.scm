@@ -91,6 +91,15 @@
            (loop (o-del 'i o) (cons 'w/nocase wl)))
           (else wl))))
 
+; NB: if your implementation of the SRE SRFI supports infinite upper bounds in the
+; **/**? forms, return the corresponding SRE value; otherwise, uncomment the 'fail'
+; variants. Here we assume that such a bound is denoted by #f, as in IrRegex and
+; Alex Shinn's reference implementation
+(define (infub) #f) ; e.g. #f, fx-greatest, +inf.0, ...
+(define (infub? x) (eqv? x #f))
+; (define (infub) (fail "no support for infinite upper bounds in **/**?"))
+; (define (infub? x) #f)
+
 ; SRE consructors
 
 (define (e-e) '(:))
@@ -162,14 +171,6 @@
   (cond ((not n) (list '>= m e))
         ((eqv? m n) (list '= m e))
         (else (list '** m n e))))
-; NB: if your implementation of the SRE SRFI supports infinite upper bounds in the
-; **/**? forms, return the corresponding SRE value; otherwise, uncomment the 'fail'
-; variants. Here we assume that such a bound is denoted by #f, as in IrRegex and
-; Alex Shinn's reference implementation
-(define (infub) #f) ; e.g. #f, fx-greatest, +inf.0, ...
-(define (infub? x) (eqv? x #f))
-; (define (infub) (fail "no support for infinite upper bounds in **/**?"))
-; (define (infub? x) #f)
 (define (opt-e e)
   (if (pair? e)
       (case (car e)
@@ -593,8 +594,9 @@
     (if (headed-list? cr 'bcnd 'cset) cr `(,ct ,cr)))
   ; do not sort, just cluster/merge same-type neighbors
   (define (or-join r1 r2 ti)
-    (cond ((and (eq? ti 'cset) (equal? r1 r2) r1)) ; safe: no groups inside
-          ((and (headed-list? r1 'or) (member r2 (cdr r1))) r1)
+    (cond ;these tests shorten the output, but lead to quadratic behavior
+          ;((and (eq? ti 'cset) (equal? r1 r2) r1)) ; safe: no groups inside
+          ;((and (headed-list? r1 'or) (member r2 (cdr r1))) r1)
           (else (or-e r1 r2))))
   (define (finalize-or rl tl)
     (let loop ((rl rl) (tl tl) (ct #f) (crl '()) (ctl '()))
