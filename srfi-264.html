@@ -49,7 +49,7 @@ Extensions to PCRE syntax allow concise expression of operations on named charac
 
 <h2 id="issues">Issues</h2>
 
-<p>The design of the <code>string-sre-definitions</code> procedure assumes that parameters follow the protocol
+<p>The design of the <code>ssre-definitions</code> procedure assumes that parameters follow the protocol
 described in <a href="https://srfi.schemers.org/srfi-115/">SRFI 39</a>, namely that a parameter procedure
 can be called with a value argument to set the parameter globally. This behavior is not required by R7RS.</p>
 
@@ -69,7 +69,7 @@ non-ASCII characters, fully relying on regular Scheme string syntax for this pur
 for features that are not covered by SRE specification are supported; if a SRE feature can be
 represented by more than one PCRE construct, only the most frequently used one of each group
 is supported by SSRE. The examples below show SSRE notation and its equivalent in SRE form (note that
-multiple SRE equivalents with the exact same semantics may exist). The <code>string-sre->sre</code>
+multiple SRE equivalents with the exact same semantics may exist). The <code>ssre->sre</code>
 procedure does the transformation.
 </p>
 
@@ -160,18 +160,18 @@ they can be specified via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&h
 
 
 <p>
-The set of named sets/boundary conditions/expressions can be extended via the <code>string-sre-definitions</code>
+The set of named sets/boundary conditions/expressions can be extended via the <code>ssre-definitions</code>
 parameter, e.g.:
 </p>
 
-<pre><code>  (string-sre-definitions
-    (string-sre-bind 'Any 'cset 'any
-    (string-sre-bind 'Nd 'cset char-set:Nd
-    (string-sre-bind 'vowel 'cset '(or #\a #\e #\i #\o #\u #\y #\w)
-    (string-sre-bind 'Vowel 'cset '(or #\A #\E #\I #\O #\U #\Y #\W)
-    (string-sre-bind 'EHi 'cset char-set:Egyptian_Hieroglyphs
-    (string-sre-bind 't 'cset char-set:title-case
-    (string-sre-definitions))))))))
+<pre><code>  (ssre-definitions
+    (ssre-bind 'Any 'cset 'any
+    (ssre-bind 'Nd 'cset char-set:Nd
+    (ssre-bind 'vowel 'cset '(or #\a #\e #\i #\o #\u #\y #\w)
+    (ssre-bind 'Vowel 'cset '(or #\A #\E #\I #\O #\U #\Y #\W)
+    (ssre-bind 'EHi 'cset char-set:Egyptian_Hieroglyphs
+    (ssre-bind 't 'cset char-set:title-case
+    (ssre-definitions))))))))
 
 </code></pre>
 
@@ -184,40 +184,44 @@ all PCRE constructs supported by SSRE, as defined by the formal syntax below, ha
 </p>
 
 <p>
-<code>(<b>string-sre->sre</b></code> &langle;<i>string</i>&thinsp;&rangle;<code>)</code>
+<code>(<b>ssre->sre</b></code> &langle;<i>string</i>&thinsp;&rangle;<code>)</code>
     &nbsp;&nbsp;<i>procedure</i><br/>
 This procedure converts &langle;<i>string</i>&thinsp;&rangle; in SSRE syntax to the corresponding SRE.
-If the string is not a valid SSRE, an error that satisfies <code>string-sre-syntax-error?</code> is signaled.
+It is an error if the argument is not a valid SSRE string.
 </p>
 
 <p>
-<code>(<b>string-sre->regexp</b></code> &langle;<i>string</i>&thinsp;&rangle;<code>)</code>
+<code>(<b>ssre->regexp</b></code> &langle;<i>string</i>&thinsp;&rangle;<code>)</code>
     &nbsp;&nbsp;<i>procedure</i><br/>
 This procedure converts &langle;<i>string</i>&thinsp;&rangle; in SSRE syntax to the corresponding regexp by
 applying the <code>regexp</code> procedure from <a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a> to the
-conversion result. If the string is not a valid SSRE, an error that satisfies <code>string-sre-syntax-error?</code>
-is signaled.
+conversion result. It is an error if the argument is not a valid SSRE string.
 </p>
 
 <p>
-<code>(<b>string-sre-syntax-error?</b></code> &langle;<i>obj</i>&thinsp;&rangle;<code>)</code>
+<code>(<b>sre-&gt;ssre</b></code> &langle;<i>sre</i>&thinsp;&rangle;<code>)</code>
     &nbsp;&nbsp;<i>procedure</i><br/>
-Error type predicate. Returns <code>#t</code> if &langle;<i>obj</i>&thinsp;&rangle; is an object raised
-by the <code>string-sre->sre</code> procedure. Otherwise, returns <code>#f</code>.
+This procedure converts &langle;<i>sre</i>&thinsp;&rangle; expression in <a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a>
+SRE format to the SSRE syntax. SREs containing embedded <a href="https://srfi.schemers.org/srfi-14/">SRFI 14</a>
+character set objects can be converted only if all such objects are bound to names in the definitions parameter
+as described below.
+It is an error if the argument is not a valid SRE, or contains non-bound character set objects.
 </p>
 
 <p>
-<code>(<b>string-sre-definitions</b>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
-<code>(<b>string-sre-definitions </b></code> &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
-This procedure acts as a parameter, providing access to the list of defined entities for the <code>string-sre->sre</code> procedure.
-The &langle;<i>bindings</i>&thinsp;&rangle; argument is either a result of calling <code>string-sre-definitions</code> with
-no arguments, or a result of calling one of the two procedures below.
+<code>(<b>ssre-definitions</b>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
+<code>(<b>ssre-definitions </b></code> &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
+This procedure acts as a parameter, providing access to the list of defined entities for the <code>ssre->sre</code>
+and <code>sre->ssre</code> procedures.
+The &langle;<i>bindings</i>&thinsp;&rangle; argument is either a result of calling <code>ssre-definitions</code> with
+no arguments, or a result of calling one of the two procedures below. The exact form this object takes is
+left unspecified, as only procedures in this library need to interpret it.
 </p>
 
 <p>
-<code>(<b>string-sre-bind </b></code> &langle;<i>name</i>&thinsp;&rangle; &langle;<i>type</i>&thinsp;&rangle; &langle;<i>sre</i>&thinsp;&rangle; &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
-<code>(<b>string-sre-unbind </b></code> &langle;<i>name</i>&thinsp;&rangle; &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
-The &langle;<i>bindings</i>&thinsp;&rangle; argument is either a result of calling <code>string-sre-definitions</code> with no arguments, or a result of calling one of these two procedures.
+<code>(<b>ssre-bind </b></code> &langle;<i>name</i>&thinsp;&rangle; &langle;<i>type</i>&thinsp;&rangle; &langle;<i>sre</i>&thinsp;&rangle; &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
+<code>(<b>ssre-unbind </b></code> &langle;<i>name</i>&thinsp;&rangle; &langle;<i>bindings</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
+The &langle;<i>bindings</i>&thinsp;&rangle; argument is either a result of calling <code>ssre-definitions</code> with no arguments, or a result of calling one of these two procedures.
 The &langle;<i>name</i>&thinsp;&rangle; argument is a symbol. The &langle;<i>type</i>&thinsp;&rangle; argument is one of the following symbols: <code>cset</code> (stands for character set),
 <code>bcnd</code> (stands for boundary condition), or <code>expr</code> (stands for any SRE expression).<br>
 The first procedure creates a new &langle;<i>bindings</i>&thinsp;&rangle; object, giving a new definition for &langle;<i>name</i>&thinsp;&rangle;, replacing the old definition if any; the
@@ -226,7 +230,7 @@ if such a definition was present; otherwise, the original bindings object is ret
 </p>
 
 <p>
-Note that the result of the conversion depends only on the input string and the value of the <code>string-sre-definitions</code>
+Note that the result of the conversion depends only on the input string and the value of the <code>ssre-definitions</code>
 parameter. This allows implementations to cache conversion results if the converter is called with the same SSRE string repeatedly.
 </p>
 
@@ -272,7 +276,9 @@ characters are handled in the same way; no special escape mechanism is provided 
 &langle;<i>empty regexp</i>&hairsp;&rangle; &xrarr; &langle;<i>xs</i>&hairsp;&rangle;
 
 &langle;<i>quantified regexp</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle;<small>*</small>
+<span style="visibility: hidden">| </span>&langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle; <code>?</code>
+| &langle;<i>primary regexp</i>&hairsp;&rangle; &langle;<i>quantifier</i>&hairsp;&rangle;
+| &langle;<i>primary regexp</i>&hairsp;&rangle;
 
 &langle;<i>quantifier</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>xs</i>&hairsp;&rangle; <code><span style="position: relative; top: 0.2em;">*</span></code>
@@ -334,21 +340,25 @@ characters are handled in the same way; no special escape mechanism is provided 
 | <code>\\</code> | <code>\^</code> | <code>\-</code> | <code>\[</code> | <code>\]</code>
 
 &langle;<i>set regexp</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span><code>{</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set alt</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>}</code>
+<span style="visibility: hidden">| </span><code>{</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set body</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>}</code>
+
+&langle;<i>set body</i>&hairsp;&rangle; &xrarr;
+<span style="visibility: hidden">| </span><code>?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>:</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set body</i>&hairsp;&rangle;
+| &langle;<i>set alt</i>&hairsp;&rangle;
 
 &langle;<i>set alt</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set infix op</i>&hairsp;&rangle;
-| &langle;<i>set infix op</i>&hairsp;&rangle;
+<span style="visibility: hidden">| </span>&langle;<i>set infix</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>|</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set alt</i>&hairsp;&rangle;
+| &langle;<i>set infix</i>&hairsp;&rangle;
 
-&langle;<i>set infix op</i>&hairsp;&rangle; &xrarr;
-<span style="visibility: hidden">| </span>&langle;<i>set prefix op</i>&hairsp;&rangle;
-| &langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>&</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
-| &langle;<i>set infix op</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>-</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
+&langle;<i>set infix</i>&hairsp;&rangle; &xrarr;
+<span style="visibility: hidden">| </span>&langle;<i>set prefix</i>&hairsp;&rangle;
+| &langle;<i>set infix</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>&</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
+| &langle;<i>set infix</i>&hairsp;&rangle; &langle;<i>xs</i>&hairsp;&rangle; <code>-</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
 
-&langle;<i>set prefix op</i>&hairsp;&rangle; &xrarr;
+&langle;<i>set prefix</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>set primary</i>&hairsp;&rangle;
-| <code>~</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
-| <code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix op</i>&hairsp;&rangle;
+| <code>~</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
+| <code>!</code> &langle;<i>xs</i>&hairsp;&rangle; &langle;<i>set prefix</i>&hairsp;&rangle;
 
 &langle;<i>set primary</i>&hairsp;&rangle; &xrarr;
 <span style="visibility: hidden">| </span>&langle;<i>set name</i>&hairsp;&rangle;
@@ -390,7 +400,13 @@ characters are handled in the same way; no special escape mechanism is provided 
 &langle;<i>capture label</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;
 &langle;<i>class name</i>&hairsp;&rangle; &xrarr; &langle;<i>word</i>&hairsp;&rangle;
 &langle;<i>set name</i>&hairsp;&rangle; &xrarr; &langle;<i>name</i>&hairsp;&rangle;
+</p>
 
+<p>Note that translation of non-greedy repeats with a non-zero lower bound and infinite upper bound
+(e.g. <code>x+?</code> or <code>x{2,}?</code>) is implementation-dependent. Systems that support the
+corresponding extended SRE forms (e.g. by providing a way to specify the infinite upper bound in the
+<code>**?</code> form) are encouraged to implement the translation as well; otherwise these forms
+are errors.
 </p>
 
 <h3 id="named-entities">Named entities</h3>
@@ -409,6 +425,12 @@ single-letter variants <code>\p</code><i>n</i>&hairsp;, <code>\P</code><i>n</i>&
     <th>Name&nbsp;&nbsp;&nbsp;</th><th>Type&nbsp;&nbsp;&nbsp;</th><th>SRE</th></tr>
   <tr><td><code>any</code></td><td>cset</td><td><code>any</code></td>
       <td><code>_</code></td><td>cset</td><td><code>any</code></td>
+      <td></td><td></td><td></td></tr>
+  <tr><td><code>nonl</code></td><td>cset</td><td><code>nonl</code></td>
+      <td></td><td></td><td></td>
+      <td></td><td></td><td></td></tr>
+  <tr><td><code>ascii</code></td><td>cset</td><td><code>ascii</code></td>
+      <td></td><td></td><td></td>
       <td></td><td></td><td></td></tr>
   <tr><td><code>digit</code></td><td>cset</td><td><code>numeric</code></td>
       <td><code>d</code></td><td>cset</td><td><code>numeric</code></td>
@@ -517,12 +539,20 @@ have the same (medium) priority, <code>!</code> and <code>~</code> have the high
   <tr><td><code>|</code></td><td>bcnd&times;bcnd&rarr;bcnd</td><td><code>|</code> (or)</td></tr>
 </table>
 
+<p>
+There is also a special notation for option change, similar to the one used at the beginning of
+non-capturing groups. A sequence of the form <code>?</code> &langle;<i>regexp options</i>&hairsp;&rangle; <code>:</code>
+acts like a prefix operator with the lowest possible priority; it can follow an open brace or another option change
+notation. Its scope is the rest of the set notation expression up to the matching close brace.
+</p>
+
 <h3 id="options">Regexp options</h3>
 
 <p>
-Options can be specified either as optional symbol arguments to the <code>string-sre->sre</code> procedure,
-or in the SSRE string itself via <code>(?</code>&langle;<i>option</i>&hairsp;&rangle;&hellip; notation at the start of the string
-or a non-capturing group. They have their traditional meanings. Some of them affect the way certain SSRE expressions are translated
+Options can be specified in the SSRE string itself via <code>?</code>&langle;<i>regexp options</i>&hairsp;&rangle; notation at the start of the string
+(in parenthesized form) or at the start of a non-capturing group or a set notation
+(followed by colon as described above).
+They have their traditional meanings. Some of them affect the way certain SSRE expressions are translated
 into SRE, some are purely syntactical (<code>x</code>). The table below lists all of them with short descriptions; in the Translation column,
 comma separates SRE constructs used when the option is on from their alternatives used when the option is off.
 Initially all options are off except for <code>u</code>.
@@ -545,12 +575,14 @@ and thus is not converted to SRE <code>w/nocapture</code>, which would disable a
 
 <h2 id="implementation">Sample implementation</h2>
 
-<p>Implementation note: </p>
+<p>Implementation note: the files linked below can be <code>load</code>-ed into many
+R6RS/R7RS systems; they can serve as starting points for system-specific implementations,
+possibly supporting additional constructs.</p>
 
-<a href="ssre.scm">Source for the sample implementation</a> (R6RS/R7RS).<br/>
+<a href="ssre.scm">Source for the sample implementation</a>.<br/>
 <a href="ssre-tests.scm">Tests</a> (ASCII only).
 
-<p>The SRFI-264 repository also contains R7RS libraries and a SRFI-64-based test suite.</p>
+<p>The SRFI-264 repository also contains a portable R7RS library and a SRFI-64-based test suite.</p>
 
 <h2 id="acknowledgements">Acknowledgements</h2>
 

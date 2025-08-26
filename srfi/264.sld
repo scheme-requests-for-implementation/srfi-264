@@ -2,9 +2,9 @@
 ;;; SPDX-License-Identifier: MIT
 
 (define-library (srfi 264)
-  (export string-sre->sre string-sre->regexp string-sre-syntax-error?
-          string-sre-definitions string-sre-bind string-sre-unbind )
-  (import (scheme base) (scheme char) (scheme cxr) (srfi 39) (srfi 115))
+  (export ssre->sre ssre->regexp sre->ssre ssre-definitions ssre-bind ssre-unbind)
+  (import (scheme base) (scheme char) (scheme cxr) (scheme write)
+          (srfi 14) (srfi 39) (srfi 115))
 
 (begin
 ;========================================================================================
@@ -14,6 +14,9 @@
 ;========================================================================================
 
 ; Helpers
+
+(define orsym (string->symbol "|")) ; r7rs: '|\||
+(define arrsym (string->symbol "->")) ; r6rs/r7rs: '->
 
 (define-syntax receive
   (syntax-rules ()
@@ -31,7 +34,7 @@
   (- (char->integer c) (char->integer #\0)))
 
 (define (fail s msg . args)
-  (raise (list 'string-sre->sre s msg args)))
+  (raise (list 'ssre->sre s msg args)))
 
 (define opar #\()
 (define cpar #\))
@@ -56,7 +59,14 @@
         ((eqv? (car p) (car s)) (prefix? (cdr p) (cdr s)))
         (else #f)))
 
+(define (sre=? s1 s2)
+  (or (eqv? s1 s2)
+      (and (char-set? s1) (char-set? s2) (char-set= s1 s2)) ; requires srfi 14
+      (and (string? s1) (string? s2) (string=? s1 s2))
+      (and (pair? s1) (pair? s2) (sre=? (car s1) (car s2)) (sre=? (cdr s1) (cdr s2)))))
+
 ; Option flags are symbols from the {i, m, s, x, n, u} set
+; For convenience, they are combined with definitions in a single env
 
 (define o-set? memq)
 (define (o-add f o)
@@ -69,6 +79,10 @@
   (cond ((null? o) #f)
         ((and (pair? (car o)) (eq? n (caar o))) (car o))
         (else (o-lookup n (cdr o)))))
+(define (o-reverse-lookup sre o)
+  (cond ((null? o) #f)
+        ((and (pair? (car o)) (sre=? sre (caddar o))) (car o))
+        (else (o-reverse-lookup sre (cdr o)))))
 (define (o-skip s o)
   (if (o-set? 'x o) (skip s) s))
 (define (o-wrappers o0 o1) ;=> (w/x w/y ...)
@@ -83,9 +97,19 @@
            (loop (o-del 'i o) (cons 'w/nocase wl)))
           (else wl))))
 
+; NB: if your implementation of the SRE SRFI supports infinite upper bounds in the
+; **/**? forms, return the corresponding SRE value; otherwise, uncomment the 'fail'
+; variants. Here we assume that such a bound is denoted by #f, as in IrRegex and
+; Alex Shinn's reference implementation
+(define (infub) #f) ; e.g. #f, fx-greatest, +inf.0, ...
+(define (infub? x) (eqv? x #f))
+; (define (infub) (fail "no support for infinite upper bounds in **/**?"))
+; (define (infub? x) #f)
+
 ; SRE consructors
 
 (define (e-e) '(:))
+(define (e-null) '(or))
 (define (e-bos o) (if (o-set? 'm o) 'bol 'bos))
 (define (e-eos o) (if (o-set? 'm o) 'eol 'eos))
 (define (e-dot o) (if (o-set? 's o) 'any 'nonl))
@@ -110,19 +134,22 @@
 (define (with-e wl e)
   (if (null? wl) e (list (car wl) (with-e (cdr wl) e))))
 (define (or-e e1 e2)
-  (if (and (pair? e1) (eqv? (car e1) 'or))
-      (append e1 (list e2))
-      (list 'or e1 e2)))
+  (cond ((equal? e2 '(or)) e1)
+        ((and (pair? e1) (eqv? (car e1) 'or))
+         (append e1 (list e2)))
+        (else (list 'or e1 e2))))
 (define (and-e e1 e2)
-  (cond ((and (pair? e1) (eqv? (car e1) 'and))
+  (cond ((or (equal? e1 '(or)) (equal? e2 '(or))) '(or))
+        ((and (pair? e1) (eqv? (car e1) 'and))
          (append e1 (list e2)))
         ((and (pair? e2) (eqv? (car e2) '~))
          (list '- e1 (cadr e2)))
         (else (list 'and e1 e2))))
 (define (diff-e e1 e2)
-  (if (and (pair? e1) (eqv? (car e1) 'diff))
-      (append e1 (list e2))
-      (list '- e1 e2)))
+  (cond ((or (equal? e1 '(or)) (equal? e2 '(or))) e1)
+        ((and (pair? e1) (eqv? (car e1) 'diff))
+         (append e1 (list e2)))
+        (else (list '- e1 e2))))
 (define (range-e e1 e2)
  (list 'char-range e1 e2))
 (define (inv-e e)
@@ -150,21 +177,14 @@
   (cond ((not n) (list '>= m e))
         ((eqv? m n) (list '= m e))
         (else (list '** m n e))))
-; NB: here we rely on a 'hidden feature' of the SRE specification: the second counter
-; of the ** repeat can be #f (standing in for infinity); this extension is supported
-; by Alex Shinn's reference implementation for both ** and **?, which makes it unnecessary
-; to have nongreedy version of >= and/or duplicate repeated expression as a workaround
-; If your SRE implementation does not support it, you may use (: e (*? e)) for +? and
-; (: (**? m m e) (*? e)) for +=? if not for the fact that duplicated groups will not
-; be counted properly
 (define (opt-e e)
   (if (pair? e)
       (case (car e)
         ((?)  `(?? ,(cadr e)))
         ((*)  `(*? ,(cadr e)))
-        ((+)  `(**? 1 #f ,(cadr e))) ; see note above
+        ((+)  `(**? 1 ,(infub) ,(cadr e))) ; see note above
         ((=)  `(**? ,(cadr e) ,(cadr e) ,(caddr e)))
-        ((>=) `(**? ,(cadr e) #f ,(caddr e))) ; see note above
+        ((>=) `(**? ,(cadr e) ,(infub) ,(caddr e))) ; see note above
         ((**) `(**? ,@(cdr e)))
         (else `(? ,e)))
       (list '? e)))
@@ -172,7 +192,7 @@
   (list e e1))
 (define (group-e e) (list '$ e))
 (define (ungroup-e e) (if (and (= (length e) 2) (eq? (car e) '$)) (cadr e) e))
-(define (namegroup-e name e) (list '-> name e))
+(define (namegroup-e name e) (list arrsym name e))
 (define (backref-e n) (list 'backref n))
 (define (lookahead-e e) (list 'look-ahead e))
 (define (lookbehind-e e) (list 'look-behind e))
@@ -192,7 +212,7 @@
 
 ; PCRE-like notation parser
 
-(define (parse-re-spec src o) ;=> e, s
+(define (parse-ssre-spec src o) ;=> e, s
   (define (parse-body s o) ;=> e, s
     (let ((s0 (prefix? "(?" s)))
       (if (and s0 (pair? s0) (or (char-alphabetic? (car s0)) (eqv? (car s0) #\-)))
@@ -394,6 +414,13 @@
   (define (check-bcnd t e s op)
     (unless (eq? t 'bcnd)
       (fail s (string-append op " applied no non-bcnd argument") e s)))
+  (define (parse-body s o) ;=> t, e, s
+    (cond ((prefix? "?" s)
+           (receive (s o1) (parse-re-options (cdr s) o)
+             (unless (prefix? ":" s) (fail s "missing : after option flags"))
+             (receive (t e s) (parse-body (o-skip (cdr s) o1) o1)
+               (values t (with-e (o-wrappers o o1) e) s))))
+          (else (parse-or s o))))
   (define (parse-or s o) ;=> t, e, s
     (receive (t e s) (parse-in s o)
       (let loop ((t t) (e e) (s (o-skip s o)))
@@ -429,10 +456,13 @@
                (check-bcnd t e (cdr s) "!")
                (values 'bcnd (not-e e) s1)))
             ((and (pair? s) (eqv? (car s) obrc))
-             (receive (t e s) (parse-re-set (cdr s) o)
-               (when (or (null? s) (not (eqv? (car s) cbrc)))
-                 (fail s "missing }"))
-               (values t e (cdr s))))
+             (let ((s (o-skip (cdr s) o)))
+               (if (and (pair? s) (eqv? (car s) cbrc))
+                   (values 'cset (e-null) (cdr s)) ; {} => (or)
+                   (receive (t e s) (parse-body s o)
+                     (when (or (null? s) (not (eqv? (car s) cbrc)))
+                       (fail s "missing }"))
+                     (values t e (cdr s))))))
             ((and (pair? s) (eqv? (car s) obrk))
              (receive (cs s) (parse-re-class (cdr s) o)
                (when (or (null? s) (not (eqv? (car s) cbrk)))
@@ -442,25 +472,480 @@
   (define (parse-prim s0 o) ;=> t, e, s
     (define (name-char? c)
       (or (char-alphabetic? c) (eqv? c #\_) (eqv? c #\<) (eqv? c #\>)))
-    (if (or (eqv? (car s0) #\^) (eqv? (car s0) #\/))
-        (let ((name (string->symbol (string (car s0)))))
-          (receive (t e) (ref-named-expr name o s0)
-            (values t e (cdr s0))))
-        (let loop ((s s0) (l '()))
-          (cond ((and (pair? s) (name-char? (car s)))
-                 (loop (cdr s) (cons (car s) l)))
-                ((pair? l)
-                 (let ((name (string->symbol (list->string (reverse l)))))
-                   (receive (t e) (ref-named-expr name o s0)
-                     (values t e s))))
-                (else (fail s0 "name expected"))))))
-  (receive (t e s) (parse-or (o-skip src o) o)
-    (values t e (o-skip s o))))
+    (let loop ((s s0) (l '()))
+      (cond ((and (pair? s) (name-char? (car s)))
+              (loop (cdr s) (cons (car s) l)))
+            ((pair? l)
+              (let ((name (string->symbol (list->string (reverse l)))))
+                (receive (t e) (ref-named-expr name o s0)
+                  (values t e s))))
+            (else (fail s0 "name expected")))))
+  (let ((s (o-skip src o)))
+    (if (and (pair? s) (eqv? (car s) cbrc))
+        (values 'cset (e-null) s) ; {} => (or)
+        (receive (t e s) (parse-body s o)
+          (values t e (o-skip s o))))))
 
+
+; PCRE-like notation unparser (tries to use extended syntax only if necessary)
+
+(define (unfail msg . args)
+  (apply error 'sre->ssre msg args))
+
+#| sre->core-sre converts sre to a simplified 'core' grammar that looks like this:
+<csre> ::=
+     | (cset <cset-csre>)            ; *extension, marks cset-typed subtrees
+     | (bcnd <bcnd-csre>)            ; *extension, marks bcnd-typed subtrees
+     | (named <name> "tn")           ; <name> symbol names a definition of expr kind, "tn" can be #f
+     | (shortcut <exc> <name> "tn")  ; <exc> ::= #\X, <name> and top name "tn" can be #f
+     | (** <n> <m> <csre>)           ; <n> to <m> matches; <m> can be #f (meaning infinity)
+     | (**? <n> <m> <csre>)          ; <n> to <m> non-greedy matches; <m> can be #f (meaning infinity)
+     | (or <csre>...)                ; zero or at least 2 alternatives
+     | (: <csre>...)                 ; zero or at least 2 concatenees
+     | ($ <csre>)                    ; numbered submatch
+     | (-> <name> <csre>)            ; named submatch
+     | (w/case <csre>)               ; single-arg case and unicode toggling
+     | (w/nocase <csre>)
+     | (w/ascii <csre>)
+     | (w/unicode <csre>)
+     | (look-ahead <csre>)           ; zero-width look-ahead assertion
+     | (look-behind <csre>)          ; zero-width look-behind assertion
+     | (neg-look-ahead <csre>)       ; zero-width negative look-ahead assertion
+     | (neg-look-behind <csre>)      ; zero-width negative look-behind assertion
+     | (backref <n-or-name>)         ; match a previous submatch
+
+<cset-csre> ::=
+     | <char>
+     | (/ <char> <char>)             ; elementary char range
+     | (named <name> "tn")           ; <name> symbol names a definition of csre kind, "tn" can be #f
+     | (shortcut <csc> <name> "tn")  ; <csc> ::= #\s | #\d | #\w | #\S | #\D | #\W, <name> and "tn" can be #f
+     | (or <cset-csre> ...)          ; union of zero or at least two
+     | (& <cset-csre> ...)           ; intersection of zero or at least two
+     | (- <cset-csre> ...)           ; difference of at least two
+     | (~ <cset-csre>)               ; complement of exactly one
+     | (w/case <cset-csre>)          ; single-arg case and unicode toggling
+     | (w/nocase <cset-csre>)
+     | (w/ascii <cset-csre>)
+     | (w/unicode <cset-csre>)
+
+<bcnd-sre> ::=
+     | (named <name> "tn")           ; symbol names a definition of bcnd kind, "tn" can be #f
+     | (shortcut <bcc> <name> "tn")  ; <bcc> ::= #\< | #\> | #\b | #\A | #\z, <name> and "tn" can be #f
+     | (or <bcnd-csre> ...)          ; logical OR of zero or at least two
+     | (neg-look-ahead <bcnd-csre>)  ; logical NOT of exactly one
+|#
+
+(define (sre->core-sre sre o) ;=> cre
+  (define (range-spec? rs) (or (char? rs) (string? rs)))
+  (define (headed-list? x . hl) (and (pair? x) (memq (car x) hl) (list? (cdr x))))
+  (define (list1? x) (and (pair? x) (null? (cdr x))))
+  (define (list2? x) (and (pair? x) (list1? (cdr x))))
+  (define (arg-or-seq l) (if (list1? l) (car l) (cons ': l)))
+  (define (arg-or-union l) (if (list1? l) (car l) (cons 'or l)))
+  (define (count? x) (and (number? x) (exact? x) (not (negative? x))))
+  (define (alnum? x) (memq x '(alphanumeric alphanum alnum)))
+  (define (underscore? x) (member x '(#\_ ("_"))))
+  (define (wordcs? r)
+    (and (headed-list? r orsym 'or) (list2? (cdr r))
+         (or (and (alnum? (cadr r)) (underscore? (caddr r))) (and (underscore? (cadr r)) (alnum? (caddr r))))))
+  (define (wordbnd? r)
+    (and (headed-list? r orsym 'or) (member (cdr r) '((bow eow) (eow bow)))))
+  ; shortcuts do not depend on the current definitions paramteter
+  (define (shortcut-expr-sre? r) ;=> char | #f
+    (cond ((memq r '(grapheme)) #\X)
+          ((equal? r '(: (? #\newline) eos)) #\Z) ; mostly roundtripping hack
+          (else #f)))
+  (define (shortcut-cset-sre? r) ;=> char | #f
+    (cond ((memq r '(numeric num)) #\d)
+          ((and (headed-list? r '~ 'complement) (list1? (cdr r)) (memq (cadr r) '(numeric num))) #\D)
+          ((memq r '(whitespace white space)) #\s)
+          ((and (headed-list? r '~ 'complement) (list1? (cdr r)) (memq (cadr r) '(whitespace white space))) #\S)
+          ((wordcs? r) #\w)
+          ((and (headed-list? r '~ 'complement) (list1? (cdr r)) (wordcs? (cadr r))) #\W)
+          (else #f)))
+  (define (shortcut-bcnd-sre? r) ;=> char | #f
+    (cond ((eq? r 'bos) #\A) ; better use ^ outside of charsets
+          ((eq? r 'eos) #\z) ; better use $ outside of charsets
+          ((eq? r 'bow) #\<)
+          ((eq? r 'eow) #\>)
+          ((wordbnd? r) #\b)
+          ((eq? r 'nwb) #\B)
+          ((and (headed-list? r 'neg-look-ahead) (list1? (cdr r)) (wordbnd? (cadr r))) #\B)
+          (else #f)))
+  ; try to map r to our 'canonical' name for reverse definition lookup
+  (define (named-class-sre? r) ;=> sym | #f
+    (cond ((assq r '((lower-case . lower) (lower . lower) (upper-case . upper) (upper . upper)
+             (title-case . title) (title . title) (alphabetic . alpha) (alpha . alpha)
+             (whitespace . space) (white . space) (space . space) (numeric . numeric) (num . numeric)
+             (alphanumeric . alnum) (alphanum . alnum) (alnum . alnum) (symbol . symbol)
+             (control . cntrl) (cntrl . cntrl) (printing . print) (print . print)
+             (graphic . graph) (graph . graph) (punctuation . punct) (punct . punct)
+             (hex-digit . xdigit) (xdigit . xdigit) (ascii . ascii))) => cdr)
+          (else #f)))
+  (define (lookup r o)
+    (let ((rv (or (and (symbol? r) (named-class-sre? r)) r)))
+      (o-reverse-lookup rv o)))
+  (define (lookup-name r o t)
+    (let ((x (lookup r o))) (and x (eq? (cadr x) t) (car x))))
+  (define (flatten-char-ranges l) ;=> (start-char end-char ...)
+    (let flatten ((l l) (fl '()))
+      (cond ((null? l) (reverse fl))
+            ((string? (car l)) (flatten (append (string->list (car l)) (cdr l)) fl))
+            (else (flatten (cdr l) (cons (car l) fl))))))
+  (define (lct t1 t2) ; least common type
+    (cond ((not t1) t2) ((not t2) t1) ((eq? t1 t2) t1) (else 'expr)))
+  (define (cast cr rt ct) ;=> cr'
+    (if (eq? rt ct) cr `(,rt ,cr)))
+  (define (cast-noncasted cr ct) ;=> (rt cr')
+    (if (headed-list? cr 'bcnd 'cset) cr `(,ct ,cr)))
+  ; do not sort, just cluster/merge same-type neighbors
+  (define (or-join r1 r2 ti)
+    (cond ;these tests shorten the output, but lead to quadratic behavior
+          ;((and (eq? ti 'cset) (equal? r1 r2) r1)) ; safe: no groups inside
+          ;((and (headed-list? r1 'or) (member r2 (cdr r1))) r1)
+          (else (or-e r1 r2))))
+  (define (finalize-or rl tl)
+    (let loop ((rl rl) (tl tl) (ct #f) (crl '()) (ctl '()))
+      (if (null? rl)
+          (let ((l (reverse (map (lambda (r t) (cast r t ct)) crl ctl))))
+            (cond ((null? l) (values '(or) 'cset))
+                  ((null? (cdr l)) (values (car l) ct))
+                  (else (values `(or . ,l) ct))))
+          (let ((ri (car rl)) (ti (car tl)))
+            (if (and (pair? (cdr tl)) (eq? ti (cadr tl)))
+                (loop (cons (or-join ri (cadr rl) ti) (cddr rl)) (cons ti (cddr tl)) ct crl ctl)
+                (loop (cdr rl) (cdr tl) (lct ct ti) (cons ri crl) (cons ti ctl)))))))
+  (define (convert r o)
+    (let cvt ((r r))
+      (cond
+        ((eq? r 'bos) (values `(shortcut #\A ,(lookup-name r o 'bcnd) "^") 'bcnd))
+        ((eq? r 'eos) (values `(shortcut #\z ,(lookup-name r o 'bcnd) "$") 'bcnd))
+        ((eq? r 'nonl) (values `(named ,(lookup-name r o 'cset) ".") 'cset))
+        ((shortcut-expr-sre? r) =>
+         (lambda (c) (values `(shortcut ,c ,(lookup-name r o 'expr) #f) 'expr)))
+        ((shortcut-cset-sre? r) =>
+         (lambda (c) (values `(shortcut ,c ,(lookup-name r o 'cset) #f) 'cset)))
+        ((shortcut-bcnd-sre? r) =>
+         (lambda (c) (values `(shortcut ,c ,(lookup-name r o 'bcnd) #f) 'bcnd)))
+        ((lookup r o) =>
+         (lambda (x) (values `(named ,(car x) #f) (cadr x))))
+        ((string? r)
+         (cvt `(: . ,(string->list r))))
+        ((headed-list? r '* 'zero-or-more)
+         (cvt `(** 0 #f . ,(cdr r))))
+        ((headed-list? r '+ 'one-or-more)
+         (cvt `(** 1 #f . ,(cdr r))))
+        ((headed-list? r '? 'optional)
+         (cvt `(** 0 1 . ,(cdr r))))
+        ((and (headed-list? r '= 'exactly) (>= (length r) 2) (count? (cadr r)))
+         (cvt `(** ,(cadr r) ,(cadr r) . ,(cddr r))))
+        ((and (headed-list? r '>= 'at-least) (>= (length r) 2) (count? (cadr r)))
+         (cvt `(** ,(cadr r) #f . ,(cddr r))))
+        ((and (headed-list? r '** 'repeated)
+              (>= (length r) 3) (count? (cadr r)) (or (count? (caddr r)) (infub? (caddr r))))
+         (if (and (eqv? (cadr r) 1) (eqv? (caddr r) 1))
+             (cvt (arg-or-seq (cdddr r)))
+             (receive (cr ct) (cvt (arg-or-seq (cdddr r)))
+               (define ub (if (infub? (caddr r)) #f (caddr r)))
+               (values `(** ,(cadr r) ,ub ,(cast cr ct 'expr)) 'expr))))
+        ((headed-list? r orsym 'or)
+         (let loop ((l (cdr r)) (rl '()) (tl '()))
+           (if (null? l) (finalize-or (reverse rl) (reverse tl))
+               (receive (cr ct) (cvt (car l))
+                 (if (headed-list? cr 'or) ; splice in nested ors using ct for noncasted
+                     (let* ((srl (reverse (cdr cr))) ; mix of casted and noncasted (ct)
+                            (crl (map (lambda (r) (cast-noncasted r ct)) srl))) ; all casted
+                       ; separate cast types and cres for the rest of the algorithm
+                       (loop (cdr l) (append (map cadr crl) rl) (append (map car crl) tl)))
+                     (loop (cdr l) (cons cr rl) (cons ct tl)))))))
+        ((headed-list? r ': 'seq)
+         (let loop ((l (cdr r)) (rl '()))
+           (if (null? l)
+               (let ((l (reverse rl)))
+                 (cond ((null? l) (values '(:) 'expr)) ; epsilon
+                       ((null? (cdr l)) (values (car l) 'expr))
+                       (else (values `(: . ,l) 'expr))))
+               (receive (cr ct) (cvt (car l))
+                 (if (headed-list? cr ':) ; splice in nested :s
+                     (loop (cdr l) (append (reverse (cdr cr)) rl))
+                     (loop (cdr l) (cons (cast cr ct 'expr) rl)))))))
+        ((headed-list? r '$ 'submatch)
+         (receive (cr ct) (cvt (arg-or-seq (cdr r)))
+           (if (o-set? 'n o) (values cr ct) (values `($ ,(cast cr ct 'expr)) 'expr))))
+        ((and (headed-list? r arrsym 'submatch-named) (>= (length r) 2) (symbol? (cadr r)))
+         (receive (cr ct) (cvt (arg-or-seq (cddr r)))
+           (if (o-set? 'n o) (values cr ct) (values `(,arrsym ,(cadr r) ,(cast cr ct 'expr)) 'expr))))
+        ((headed-list? r 'w/case 'w/nocase 'w/unicode 'w/ascii)
+         ; since we don't allow multiargument w/xxx in <cset-sre> context, we just
+         ; wrap multiple args in a seq, leaving a single arg as-is; type errors won't
+         ; allow the sequenced ones to be used in the <cset-sre> context
+         (receive (cr ct) (cvt (arg-or-seq (cdr r)))
+           (values `(,(car r) ,cr) ct))) ; do not cast cr to 'expr: has to work in all contexts
+        ((headed-list? r 'w/nocapture)
+         (convert (arg-or-seq (cdr r)) (o-add 'n o))) ; use 'n flag to kill BOTH numbered and named captures!
+        ((memq r '(bos eos bol eol bog eog bow eow nwb))
+         (values r 'bcnd))
+        ((memq r '(grapheme word))
+         (values r 'expr))
+        ((headed-list? r 'word)
+         (cvt `(: bow ,@(cdr r) eow)))
+        ((headed-list? r 'word+)
+         (if (equal? (cdr r) '(any))
+             (values 'word 'expr)
+             (cvt `(word (+ (and (or alnum #\_) (or ,@(cdr r))))))))
+        ((headed-list? r '*? 'non-greedy-zero-or-more)
+         (cvt `(**? 0 #f . ,(cdr r))))
+        ((headed-list? r '?? 'non-greedy-optional)
+         (cvt `(**? 0 1 . ,(cdr r))))
+        ((and (headed-list? r '**? 'non-greedy-repeated)
+              (>= (length r) 3) (count? (cadr r)) (or (count? (caddr r)) (infub? (caddr r))))
+         (if (and (eqv? (cadr r) 1) (eqv? (caddr r) 1))
+             (cvt (arg-or-seq (cdddr r)))
+             (receive (cr ct) (cvt (arg-or-seq (cdddr r)))
+               (define ub (if (infub? (caddr r)) #f (caddr r)))
+               (values `(**? ,(cadr r) ,ub ,(cast cr ct 'expr)) 'expr))))
+        ((headed-list? r 'look-ahead 'look-behind 'neg-look-ahead 'neg-look-behind)
+         (receive (cr ct) (cvt (arg-or-seq (cdr r)))
+           ; in truth, all lookarounds are boundary conditions, but we only want to keep a small
+           ; subset of them as conditions for the purpose of rendering them via the {..} notation
+           (define rct (if (and (eq? (car r) 'neg-look-ahead) (eq? ct 'bcnd)) 'bcnd 'expr))
+           (values `(,(car r) ,(cast cr ct rct)) rct)))
+        ((and (headed-list? r 'backref) (= (length r) 2) (or (symbol? (cadr r)) (count? (cadr r))))
+         (values r 'expr))
+        ; csets, fall through
+        ((char? r)
+         (values r 'cset))
+        ((and (list1? r) (string? (car r)))
+         (cvt (cons 'or (string->list (car r)))))
+        ((and (headed-list? r 'char-set) (list1? (cdr r)) (string? (cadr r)))
+         (cvt (cons 'or (string->list (cadr r)))))
+        ((and (headed-list? r '/ 'char-range) (andmap range-spec? (cdr r)))
+         (let loop ((cr* (flatten-char-ranges (cdr r))) (rl '()))
+           (cond ((and (null? cr*) (list1? rl)) (values (car rl) 'cset))
+                 ((null? cr*) (values `(or . ,(reverse rl)) 'cset))
+                 ((null? (cdr cr*)) (unfail "odd char count in char range SRE" r))
+                 ((eqv? (car cr*) (cadr cr*)) (loop (cddr cr*) (cons (car cr*) rl)))
+                 ((char<=? (car cr*) (cadr cr*)) (loop (cddr cr*) (cons `(/ ,(car cr*) ,(cadr cr*)) rl)))
+                 (else (unfail "invalid char range in SRE" r (car cr*) (cadr cr*))))))
+        ((headed-list? r '& 'and)
+         (cond ((null? (cdr r)) (values '(&) 'cset)) ; neutral element for and, same as 'any'
+               ((null? (cddr r)) (cvt (cadr r))) ; idty: do not upgrade type?
+               (else (let loop ((l (cdr r)) (rl '()))
+                       (if (null? l) (values `(& . ,(reverse rl)) 'cset)
+                           (receive (cr ct) (cvt (car l))
+                             (unless (eq? ct 'cset) (unfail "non-cset argument inside (& ...)" (car l)))
+                             (if (headed-list? cr '&) ; splice in nested ands
+                                 (loop (cdr l) (append (reverse (cdr cr)) rl))
+                                 (loop (cdr l) (cons cr rl)))))))))
+        ((and (headed-list? r '- 'difference) (pair? (cdr r)))
+         (cond ((null? (cddr r)) (cvt (cadr r))) ; idty: do not upgrade type?
+               (else (receive (cr0 ct0) (cvt (cadr r))
+                       (unless (eq? ct0 'cset) (unfail "non-cset argument inside (- ...)" (cadr r)))
+                       (let loop ((l (cddr r)) (rl (list cr0)))
+                         (if (null? l) (values `(- . ,(reverse rl)) 'cset)
+                             (receive (cr ct) (cvt (car l))
+                               (unless (eq? ct 'cset) (unfail "non-cset argument inside (& ...)" (car l)))
+                               (if (headed-list? cr 'or) ; splice in nested ors
+                                   (loop (cdr l) (append (reverse (cdr cr)) rl))
+                                   (loop (cdr l) (cons cr rl))))))))))
+        ((headed-list? r '~ 'complement)
+         (receive (cr ct) (cvt (arg-or-union (cdr r)))
+           (unless (eq? ct 'cset) (unfail "non-cset argument inside (~ ...)" r))
+           (values `(~ ,cr) 'cset)))
+        (else (unfail "invalid or unsupported SRE" r)))))
+  ; start the conversion
+  (receive (cr ct) (convert sre o)
+    (cast cr ct 'expr)))
+
+; internal
+(define (sre->csre sre) ;=> csre
+  (define ds (ssre-definitions))
+  (sre->core-sre sre (cons 'u (ds-nes ds))))
+
+; render csre grammar to a text port p
+(define (unparse-csre-spec csre p)
+  (define (emit . xl) (for-each (lambda (x) (display x p)) xl))
+  (define (emit-shortcut x) (if (char? x) (emit #\\ x) (emit x)))
+  (define (headed-list? x . hl) (and (pair? x) (memq (car x) hl) (list? (cdr x))))
+  (define (options-prefix x)
+    (case x ((w/case) "-i") ((w/nocase) "i") ((w/unicode) "u") ((w/ascii) "-u")))
+  (define (lookaround-prefix x)
+    (case x ((look-ahead) "=") ((neg-look-ahead) "!") ((look-behind) "<=") ((neg-look-behind) "<!")))
+  (define (cset-class-elt? r)
+    (or (char? r) (headed-list? r '/ 'shortcut)))
+  (define (cset-class? r)
+    (or (cset-class-elt? r) (and (headed-list? r '~) (cset-class-elt? (cadr r)))
+        (and (headed-list? r 'or) (> (length (cdr r)) 1) (andmap cset-class-elt? (cdr r)))
+        (and (headed-list? r '~) (headed-list? (cadr r) 'or)
+             (pair? (cdadr r)) (andmap cset-class-elt? (cdadr r)))))
+  ; entry point
+  (define (unparse-top r)
+    ; recognize popular nondefault option prefixes, to save on :
+    (cond ((headed-list? r 'w/nocase 'w/case 'w/ascii 'w/unicode)
+           (emit "(?" (options-prefix (car r)) ")") (unparse-top (cadr r)))
+          ((and (headed-list? r 'cset) ; pull w/xxx out of cset wrapper
+                (headed-list? (cadr r) 'w/nocase 'w/case 'w/ascii 'w/unicode))
+           (unparse-top `(,(car (cadr r)) (cset ,(cadr (cadr r))))))
+          (else (unparse-body r))))
+  (define (unparse-body r)
+    (unparse-alt r))
+  (define (unparse-alt r)
+    (cond ((equal? r '(or)) ; special case
+           (emit "{}"))
+          ((headed-list? r 'or)
+           (let loop ((l (cdr r)))
+             (unless (null? l)
+               (unparse-alt (car l))
+               (unless (null? (cdr l)) (emit #\|))
+               (loop (cdr l)))))
+          (else (unparse-seq r))))
+  (define (unparse-seq r)
+    (cond ((headed-list? r ':)
+           (let loop ((l (cdr r)))
+             (unless (null? l)
+               (unparse-seq (car l))
+               (loop (cdr l)))))
+          (else (unparse-quant r))))
+  (define (unparse-quant r)
+    (cond ((headed-list? r '** '**?)
+           ; make sure nested repeats, if they happen, are rendred as separate
+           ; so that no unexpected non-greedy combos are produced by the parser
+           (cond ((not (headed-list? (cadddr r) '** '**?)) (unparse-quant (cadddr r)))
+                 (else (emit "(?:") (unparse-quant (cadddr r)) (emit ")")))
+           (cond ((and (eqv? (cadr r) 0) (eqv? (caddr r) 1)) (emit #\?))
+                 ((and (eqv? (cadr r) 0) (not (caddr r))) (emit #\*))
+                 ((and (eqv? (cadr r) 1) (not (caddr r))) (emit #\+))
+                 ((eqv? (cadr r) (caddr r)) (emit #\{ (cadr r) #\}))
+                 (else (emit #\{ (cadr r) #\, (or (caddr r) "") #\})))
+           (when (eq? (car r) '**?) (emit #\?)))
+          (else (unparse-prim r))))
+  (define (unparse-prim r)
+    (cond ((headed-list? r 'cset) (unparse-cset (cadr r)))
+          ((headed-list? r 'bcnd) (unparse-bcnd (cadr r)))
+          ((headed-list? r 'shortcut)
+           (cond ((cadddr r) => emit) ; use "top name" if any
+                 (else (emit-shortcut (cadr r)))))
+          ((headed-list? r 'named)
+           (cond ((caddr r) => emit) ; use "top name" if any
+                 (else (emit "\\p{" (cadr r) "}"))))
+          ((headed-list? r '$)
+           (emit "(") (unparse-body (cadr r)) (emit ")"))
+          ((headed-list? r arrsym)
+           (emit "(?<" (cadr r) ">") (unparse-body (caddr r)) (emit ")"))
+          ((headed-list? r 'w/case 'w/nocase 'w/unicode 'w/ascii)
+           (emit "(?" (options-prefix (car r)) ":") (unparse-body (cadr r)) (emit ")"))
+          ((headed-list? r 'look-ahead 'neg-look-ahead 'look-behind 'neg-look-behind)
+           (emit "(?" (lookaround-prefix (car r))) (unparse-body (cadr r)) (emit ")"))
+          ((headed-list? r 'backref)
+           (cond ((symbol? (cadr r)) (emit "\\k<" (cadr r) ">"))
+             ((< (cadr r) 100) (emit "\\" (cadr r)))
+             (else (unfail "numerical backref out of range" (cadr r)))))
+          ((headed-list? r ': 'or)
+           (emit "(?:") (unparse-body r) (emit ")"))
+          (else (unfail "unsupported SRE" r))))
+  (define (unparse-cset r)
+    (cond ((char? r)
+           (case r ((#\\ #\^ #\$ #\. #\| #\* #\+ #\? #\[ #\] #\( #\) #\{ #\}) (emit #\\)))
+           (emit r))
+          ((and (headed-list? r 'named) (caddr r)) => emit) ; use "top name" if any
+          ((headed-list? r 'shortcut)
+           (cond ((cadddr r) => emit) ; use "top name" if any
+                 (else (emit-shortcut (cadr r)))))
+          ((headed-list? r 'w/case 'w/nocase 'w/ascii 'w/unicode)
+           (emit "(?" (options-prefix (car r)) #\:) (unparse-cset (cadr r)) (emit ")"))
+          ((cset-class? r) (unparse-cset-class r))
+          (else (emit "{") (unparse-cset-body r) (emit "}"))))
+  (define (unparse-cset-body r)
+    (cond (else (unparse-cset-alt r))))
+  (define (unparse-cset-alt r)
+    (cond ((headed-list? r 'or)
+           (let loop ((l (cdr r)))
+             (unless (null? l)
+               (unparse-cset-alt (car l))
+               (unless (null? (cdr l)) (emit #\|))
+               (loop (cdr l)))))
+          (else (unparse-cset-infix r))))
+  (define (unparse-cset-infix r)
+    (cond ((headed-list? r '- '&)
+           (let loop ((l (cdr r)))
+             (cond ((null? (cdr l)) (unparse-cset-prefix (car l)))
+                   (else (unparse-cset-prefix (car l))
+                         (if (headed-list? r '&) (emit #\&) (emit #\-))
+                         (loop (cdr l))))))
+          (else (unparse-cset-prefix r))))
+  (define (unparse-cset-prefix r)
+    (cond ((headed-list? r '~)
+           (emit "~") (unparse-cset-prefix (cadr r)))
+          (else (unparse-cset-prim r))))
+  (define (unparse-cset-prim r)
+    (cond ((headed-list? r 'named) (emit (cadr r)))
+          ((headed-list? r 'shortcut)
+           (cond ((caddr r) => emit) ; use name if any
+                 (else (emit-shortcut (cadr r)))))
+          ((cset-class? r) (unparse-cset-class r))
+          ((headed-list? r 'w/case 'w/nocase 'w/ascii 'w/unicode)
+           (emit "{?" (options-prefix (car r)) #\:) (unparse-cset-body (cadr r)) (emit "}"))
+          ((headed-list? r 'or)
+           (emit "{") (unparse-cset-body r) (emit "}"))
+          (else (unfail "invalid SRE char set" r))))
+  (define (unparse-cset-class r)
+    (cond ((headed-list? r '~) (emit "[^") (unparse-class-body (cadr r)) (emit "]"))
+          (else (emit "[") (unparse-class-body r) (emit "]"))))
+  (define (unparse-class-body r)
+    (cond ((headed-list? r 'or) (for-each unparse-class-elt (cdr r)))
+          (else (unparse-class-elt r))))
+  (define (unparse-class-elt r)
+    (cond ((char? r)
+           (case r ((#\\ #\^ #\- #\[ #\]) (emit #\\))) (emit r))
+          ((headed-list? r '/)
+           (let ((r (cadr r))) (case r ((#\\ #\^ #\- #\[ #\]) (emit #\\))) (emit r))
+           (emit #\-)
+           (let ((r (caddr r))) (case r ((#\\ #\^ #\- #\[ #\]) (emit #\\))) (emit r)))
+          ((headed-list? r 'named) (emit "[:" (cadr r) ":]"))
+          ((headed-list? r 'shortcut) (emit-shortcut (cadr r)))
+          (else (unfail "invalid SRE class element" r))))
+  (define (unparse-bcnd r)
+    (cond ((headed-list? r 'shortcut)
+           (cond ((cadddr r) => emit) ; use "top name" if any
+                 (else (emit-shortcut (cadr r)))))
+          (else (emit "{") (unparse-bcnd-body r) (emit "}"))))
+  (define (unparse-bcnd-body r)
+    (unparse-bcnd-alt r))
+  (define (unparse-bcnd-alt r)
+    (cond ((headed-list? r 'or)
+           (let loop ((l (cdr r)))
+             (unless (null? l)
+               (unparse-bcnd-alt (car l))
+               (unless (null? (cdr l)) (emit #\|))
+               (loop (cdr l)))))
+          (else (unparse-bcnd-prefix r))))
+  (define (unparse-bcnd-prefix r)
+    (cond ((and (headed-list? r 'neg-look-ahead))
+           (emit "!") (unparse-bcnd-prefix (cadr r)))
+          (else (unparse-bcnd-prim r))))
+  (define (unparse-bcnd-prim r)
+    (cond ((char? r) (emit r))
+          ((headed-list? r 'named) (emit (cadr r)))
+          ((headed-list? r 'shortcut)
+           (cond ((caddr r) => emit) ; use name if any
+                 (else (emit-shortcut (cadr r)))))
+          ((headed-list? r 'or)
+           (emit "{") (unparse-bcnd-body r) (emit "}"))
+          (else (unfail "invalid SRE boundary condition" r))))
+  ; start here
+  (unparse-top csre))
+
+; internal
+(define (csre->ssre cs)
+  (let ((p (open-output-string)))
+    (unparse-csre-spec cs p)
+    (get-output-string p)))
+
+; (unparse-re-spec sre p o)
 
 (define named-exprs '(
-  (/ cset #\\)
-  (^ cset #\^)
+  (ascii cset ascii)
+  (nonl cset nonl)
   (any cset any)       (_ cset any)
   (digit cset numeric) (n cset numeric) (d cset numeric)
   (lower cset lower)   (l cset lower)
@@ -473,10 +958,10 @@
   (graph cset graph)   (g cset graph)
   (symbol cset symbol) (y cset symbol)
   (print cset print)   (gs cset print)
-  (blank cset (or #\space #\tab)) (h cset (or #\space #\tab))
+  (blank cset (or #\space #\tab)) (h cset (or #\space #\tab)) ; ascii version
   (space cset space)   (s cset space)
   (w cset (or alnum #\_))
-  (v cset (- space (or #\space #\tab)))
+  (v cset (- space (or #\space #\tab))) ; ascii version
   (bos bcnd bos) (<s bcnd bos)
   (eos bcnd eos) (s> bcnd eos)
   (bol bcnd bol) (<l bcnd bol)
@@ -496,7 +981,7 @@
         (else (fail s (string-append "name not defined: " (symbol->string name))))))
 
 ; definitions are wrapped into a ds structure with 2 extra slots to contain cached data;
-; cache #1 is for string-sre->sre, cache #2 for string-sre->regexp
+; cache #1 is for ssre->sre, cache #2 for ssre->regexp
 
 (define (make-ds nes) (vector nes '() '()))
 (define (ds-nes ds) (vector-ref ds 0))
@@ -519,48 +1004,56 @@
 ; a parameter procedure can be called with a value argument to set the parameter globally.
 ; This behavior is not required by R7RS.
 
-(define string-sre-definitions
-  (make-parameter (make-ds named-exprs)))
+(define ssre-definitions
+  ; named-exprs is reversed here to make sure o-reverse-lookup picks shorter names
+  (make-parameter (make-ds (reverse named-exprs))))
 
-(define (string-sre-bind n t e ds)
-  (make-ds (cons (list n t e) (ds-nes ds))))
+(define (ssre-bind n t e ds)
+  (make-ds (cons (list n t e) (ds-nes (ssre-unbind n ds)))))
 
-(define (string-sre-unbind n ds)
+(define (ssre-unbind n ds)
   (define (unbind n nes)
     (cond ((null? nes) nes)
           ((and (pair? nes) (pair? (car nes)) (eq? (caar nes) n)) (unbind n (cdr nes)))
-          (else (cons (car nes) (string-sre-unbind n (cdr nes))))))
+          (else (cons (car nes) (unbind n (cdr nes))))))
   (make-ds (unbind n (ds-nes ds))))
 
 (define (ssre-fancy-error str src msg args)
   (define p (- (string-length str) (length src)))
-  (define m (string-append "string-sre->sre: " msg))
+  (define m (string-append "ssre->sre: " msg))
   (when (>= p 0) ; todo: what if str is multi-line? pick p line only!
     (set! m (string-append m "\n" str "\n" (make-string p #\space) "^")))
   (apply error m args))
 
-(define (string-sre-syntax-error? x)
-  (and (list? x) (= (length x) 4) (eq? (car x) 'string-sre->sre)
+(define (ssre-syntax-error? x)
+  (and (list? x) (= (length x) 4) (eq? (car x) 'ssre->sre)
        (string? (cadr x)) (string? (caddr x)) (list? (cadddr x))))
 
-(define (string-sre->sre str)
-  (define ds (string-sre-definitions))
-  (define cs (cache-slot ds 1 str)) ; cache #1 is for string-sre->sre
+(define (ssre->sre str)
+  (define ds (ssre-definitions))
+  (define cs (cache-slot ds 1 str)) ; cache #1 is for ssre->sre
   (or (cdr cs)
-      (guard (x ((string-sre-syntax-error? x) (apply ssre-fancy-error str (cdr x))))
-        (receive (e s) (parse-re-spec (string->list str) (cons 'u (ds-nes ds)))
+      (guard (x ((ssre-syntax-error? x) (apply ssre-fancy-error str (cdr x))))
+        (receive (e s) (parse-ssre-spec (string->list str) (cons 'u (ds-nes ds)))
           (when (pair? s) (fail s (string-append "unexpected terminator char: " (string (car s)))))
           (set-cdr! cs e)
           e))))
 
-(define (string-sre->regexp str)
-  (define ds (string-sre-definitions))
-  (define cs (cache-slot ds 2 str)) ; cache #2 is for string-sre->regexp
+(define (ssre->regexp str)
+  (define ds (ssre-definitions))
+  (define cs (cache-slot ds 2 str)) ; cache #2 is for ssre->regexp
   (or (cdr cs)
-      (guard (x ((string-sre-syntax-error? x) (apply ssre-fancy-error str (cdr x))))
-        (receive (e s) (parse-re-spec (string->list str) (cons 'u (ds-nes ds)))
+      (guard (x ((ssre-syntax-error? x) (apply ssre-fancy-error str (cdr x))))
+        (receive (e s) (parse-ssre-spec (string->list str) (cons 'u (ds-nes ds)))
           (when (pair? s) (fail s (string-append "unexpected terminator char: " (string (car s)))))
           (let ((re (regexp e)))
             (set-cdr! cs re)
             re)))))
+
+(define (sre->ssre sre)
+  (define ds (ssre-definitions))
+  (let ((p (open-output-string)))
+    (unparse-csre-spec (sre->core-sre sre (cons 'u (ds-nes ds))) p)
+    (get-output-string p)))
+
 ))
