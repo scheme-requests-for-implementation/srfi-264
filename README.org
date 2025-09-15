@@ -7,7 +7,7 @@
 
 
 
-keywords: [[https://srfi.schemers.org/?keywords=data-structure][Data Structure]]
+keywords: [[https://srfi.schemers.org/?keywords=data-structure][Data Structure]], [[https://srfi.schemers.org/?keywords=text][Text]]
 
 This repository hosts [[https://srfi.schemers.org/srfi-264/][SRFI 264]]: String Syntax for Scheme Regular Expressions, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
