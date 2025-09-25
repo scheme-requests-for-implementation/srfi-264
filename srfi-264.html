@@ -52,7 +52,12 @@ Extensions to PCRE syntax allow concise expression of operations on named charac
 
 <p>The design of the <code>ssre-definitions</code> procedure assumes that parameters follow the protocol
 described in <a href="https://srfi.schemers.org/srfi-115/">SRFI 39</a>, namely that a parameter procedure
-can be called with a value argument to set the parameter globally. This behavior is not required by R7RS.</p>
+can be called with a value argument to set the parameter globally. Although this behavior is not required 
+by R7RS, it is often possible to choose a representation for the binding object 
+that ensures it is distinguishable from any value passed to the parameter 
+procedure in accordance with the local parameter protocol.
+Consequently, a hand-coded <code>ssre-definitions</code> procedure can conform to the parameter protocol 
+while extending it by accepting a binding object as a singular argument to modify the associated state.</p>
 
 <h2 id="rationale">Rationale</h2>
 
