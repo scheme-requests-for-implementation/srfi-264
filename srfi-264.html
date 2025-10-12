@@ -26,13 +26,13 @@ SPDX-License-Identifier: MIT
 
 <h2 id="status">Status</h2>
 
-    <p>This SRFI is currently in <em>draft</em> status.  Here is <a href="https://srfi.schemers.org/srfi-process.html">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi+minus+264+at+srfi+dotschemers+dot+org">srfi-264@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.  To subscribe to the list, follow <a href="https://srfi.schemers.org/srfi-list-subscribe.html">these instructions</a>.  You can access previous messages via the mailing list <a href="https://srfi-email.schemers.org/srfi-264/">archive</a>.</p>
+    <p>This SRFI is currently in <em>final</em> status.  Here is <a href="https://srfi.schemers.org/srfi-process.html">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi+minus+264+at+srfi+dotschemers+dot+org">srfi-264@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.  To subscribe to the list, follow <a href="https://srfi.schemers.org/srfi-list-subscribe.html">these instructions</a>.  You can access previous messages via the mailing list <a href="https://srfi-email.schemers.org/srfi-264/">archive</a>.</p>
     <ul>
       <li>Received: 2025-07-15</li>
-      <li>60-day deadline: 2025-09-24</li>
       <li>Draft #1 published: 2025-07-25</li>
       <li>Draft #2 published: 2025-08-05</li>
       <li>Draft #3 published: 2025-08-26</li>
+      <li>Finalized: 2025-10-11</li>
     </ul>
 
 <h2 id="abstract">Abstract</h2>
@@ -63,17 +63,6 @@ Extensions to PCRE syntax allow concise expression of operations on named charac
   <li><a href="#implementation">Sample implementation</a></li>
   <li><a href="#acknowledgements">Acknowledgements</a></li>
 </ul>
-
-<h2 id="issues">Issues</h2>
-
-<p>The design of the <code>ssre-definitions</code> procedure assumes that parameters follow the protocol
-described in <a href="https://srfi.schemers.org/srfi-115/">SRFI 39</a>, namely that a parameter procedure
-can be called with a value argument to set the parameter globally. Although this behavior is not required
-by R7RS, it is often possible to choose a representation for the binding object
-that ensures it is distinguishable from any value passed to the parameter
-procedure in accordance with the local parameter protocol.
-Consequently, a hand-coded <code>ssre-definitions</code> procedure can conform to the parameter protocol
-while extending it by accepting a binding object as a singular argument to modify the associated state.</p>
 
 <h2 id="rationale">Rationale</h2>
 

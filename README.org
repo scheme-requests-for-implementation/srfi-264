@@ -11,7 +11,7 @@ keywords: [[https://srfi.schemers.org/?keywords=data-structure][Data Structure]]
 
 This repository hosts [[https://srfi.schemers.org/srfi-264/][SRFI 264]]: String Syntax for Scheme Regular Expressions, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
-This SRFI is in /draft/ status.
+This SRFI is in /final/ status.
 See also [[/srfi-115/][SRFI 115: Scheme Regular Expressions]].
 The full documentation for this SRFI can be found in the [[https://srfi.schemers.org/srfi-264/srfi-264.html][SRFI Document]].
 
